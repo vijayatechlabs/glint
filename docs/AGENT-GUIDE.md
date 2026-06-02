@@ -39,25 +39,31 @@ Full design: `docs/ARCHITECTURE.md`.
 
 ## 4. The content lifecycle (the step-by-step)
 
+Start with **`glint init`** — it discovers the project's state and prints the
+right plan. The full state-aware flow is in **`docs/INIT.md`**.
+
 ```
-0. SET UP a brand site   → glint new (or clone starter); set site.config + voice
-1. IMPORT (if migrating)  → glint import wordpress --wxr <file> --out <repo>
-2. AUDIT                  → read docs/CONTENT-AUDIT.md; triage each post
-3. WRITE / REGENERATE     → draft to docs/brand-voice.md; on-topic; draft:true
-4. DOCTOR                 → glint doctor (schema, alt text, links, scaffolding)
-5. REVIEW (human gate)    → open a PR; human approves/edits
-6. PUBLISH                → flip draft:false on approved posts; merge
-7. BUILD + DEPLOY         → CI builds static → CDN (e.g. Cloudflare Pages)
-8. REDIRECTS + INDEXNOW   → apply redirects.json; ping IndexNow on publish
+0. INIT (discover)        → glint init   → fresh | migration | adopt | established
+1. UNFOLD                 → glint new    → scaffold structure + agent files (idempotent)
+2. VOICE                  → create/analyse docs/brand-voice.md (approve FIRST)
+3. IMPORT (if migrating)  → glint import wordpress --wxr <file> --out <repo>
+4. AUDIT                  → read docs/CONTENT-AUDIT.md; triage each post
+5. WRITE / REGENERATE     → draft to docs/brand-voice.md; on-topic; draft:true
+6. DOCTOR                 → glint doctor (schema, alt text, links, scaffolding)
+7. REVIEW (human gate)    → open a PR; human approves/edits
+8. PUBLISH                → flip draft:false on approved posts; merge
+9. BUILD + DEPLOY         → CI builds static → CDN (e.g. Cloudflare Pages)
+10. REDIRECTS + INDEXNOW  → apply redirects.json; ping IndexNow on publish
 ```
 
-Steps 3–6 are the loop you repeat per post or batch.
+Steps 5–8 are the loop you repeat per post or batch.
 
 ## 5. CLI commands
 
 | Command | Does |
 |---|---|
-| `glint new` | Scaffold a new brand site *(Phase 0 — pending)* |
+| `glint init [--dir .] [--json]` | Discover state (fresh/migration/adopt/established) + print plan |
+| `glint new [--brand --domain --collections --mount --target]` | Scaffold/complete structure + agent files (idempotent) |
 | `glint import wordpress --wxr <f> --out <repo>` | WXR → Markdown drafts + media + `redirects.json` + audit |
 | `glint build` | Static HTML + JSON/MD API + AEO surface *(pending)* |
 | `glint preview` | Local preview *(pending)* |
