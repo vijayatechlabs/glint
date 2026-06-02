@@ -13,8 +13,13 @@ publishing loop + static build, assembled on Astro + a self-hosted VPS.
 
 ## Status
 
-**Design locked → Phase 0 (engine scaffold + naam.one WordPress migration).**
-This repo currently holds the design docs; engine code lands in Phase 0.
+**Phase 0 — engine scaffold in progress.** Content contract + CLI skeleton +
+WordPress-importer stub are in `src/`. Next: install deps, add the Astro
+integration (build + AEO emitters), then migrate **naam.one** off WordPress and
+deploy the blog to **Cloudflare Pages**, mounted at `naam.one/blog`.
+
+Layout: this repo is the engine package (`@vijayatech/glint`). Each brand site
+(e.g. `vijayatechlabs/naam-blog`) is a separate repo that installs the engine.
 
 ## Confirmed stack (2026-06-02)
 

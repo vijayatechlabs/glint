@@ -1,0 +1,32 @@
+{
+  "name": "@vijayatech/glint",
+  "version": "0.0.1",
+  "description": "The lightning publishing engine for the AI era — git-native, static-output, agent-first, AEO-native.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": true,
+  "bin": {
+    "glint": "./src/cli/index.ts"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/content/schema.ts"
+  },
+  "scripts": {
+    "glint": "tsx src/cli/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["astro", "static-site", "publishing", "aeo", "agent", "git-native"],
+  "dependencies": {
+    "zod": "^3.23.0"
+  },
+  "peerDependencies": {
+    "astro": "^4.0.0 || ^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  },
+  "comment": "Deps are declared but not yet installed — that's the next scaffold step. bin runs via tsx during dev; a dist build is added before npm publish."
+}
