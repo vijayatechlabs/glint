@@ -1,0 +1,50 @@
+---
+import { render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import { pagePosts } from "../../posts";
+
+export async function getStaticPaths() {
+  const posts = await pagePosts();
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const url = new URL(`/blog/${post.id}/`, Astro.site).href;
+
+const words = post.body?.trim().split(/\s+/).length ?? 0;
+const readingTime = Math.max(1, Math.round(words / 200));
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: post.data.title,
+  description: post.data.summary,
+  datePublished: post.data.publishedAt.toISOString(),
+  dateModified: (post.data.updatedAt ?? post.data.publishedAt).toISOString(),
+  mainEntityOfPage: url,
+  ...(post.data.cover ? { image: new URL(post.data.cover.src, Astro.site).href } : {}),
+};
+---
+
+<Base
+  title={post.data.title}
+  description={post.data.summary}
+  canonical={url}
+  image={post.data.cover?.src}
+  noindex={post.data.draft}
+  jsonLd={jsonLd}
+>
+  {post.data.draft && <p><strong>⚠ DRAFT — not published (preview only)</strong></p>}
+  <article>
+    <h1>{post.data.title}</h1>
+    <p>
+      <time datetime={post.data.publishedAt.toISOString()}>
+        {post.data.publishedAt.toISOString().slice(0, 10)}
+      </time>
+      · {readingTime} min read
+    </p>
+    <Content />
+  </article>
+  <p><a href="/">← All posts</a></p>
+</Base>

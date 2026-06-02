@@ -95,6 +95,9 @@ the site. (Self-hosted Umami on the Coolify VPS is the alternative.)
 - `glint status` — content board (✅ implemented).
 - `glint doctor` — schema + scaffolding + taxonomy-registry + dup-slug +
   broken-internal-link validation; fails (exit 1) on any ERROR (✅ implemented).
-- `glint build` — static HTML honoring §1 draft rules, emitting the full §4 AEO
-  surface, §5 internal links, §6 search index, archives, and the JSON/MD API.
-- `glint preview` — local dev with drafts visible + `DRAFT`/`noindex` banner.
+- `glint build` — Astro static build honoring §1 draft rules (✅ v1: HTML +
+  `BlogPosting` JSON-LD + canonical/OG + sitemap + RSS + `llms.txt` + `/raw` twins
+  + `/api/blog.json` + reading time). **v2:** category/tag archives, related posts,
+  Pagefind search, auto OG images, per-post JSON, internal-link registry.
+- `glint preview` — Astro dev with drafts visible + `noindex` banner (✅).
+- Reference implementation + dogfood: `examples/playground/` (a buildable Glint site).

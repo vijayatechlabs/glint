@@ -67,8 +67,8 @@ Steps 5–8 are the loop you repeat per post or batch.
 | `glint status [--dir .]` | Content board — every post by status (draft/scheduled/published) |
 | `glint import wordpress --wxr <f> --out <repo>` | WXR → Markdown drafts + media + `redirects.json` + audit |
 | `glint doctor [--dir .]` | Validate schema, scaffolding leaks, taxonomy registry, dup slugs, broken internal links (fails on ERROR) |
-| `glint build` | Static HTML + JSON/MD API + AEO surface *(pending — rendering layer)* |
-| `glint preview` | Local preview with drafts visible *(pending — rendering layer)* |
+| `glint build [--dir .]` | Astro static build → HTML + JSON-LD + sitemap + RSS + llms.txt + /raw twins + JSON API (drafts excluded) |
+| `glint preview [--dir .]` | Astro dev server with drafts visible (`noindex` banner) |
 
 Run in dev via `pnpm glint <cmd>` from the engine, or the installed `glint` bin.
 

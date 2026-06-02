@@ -17,13 +17,17 @@ publishing loop + static build, assembled on Astro + a self-hosted VPS.
 
 ## Status
 
-**Phase 0 — engine scaffold in progress.** Content contract + CLI skeleton +
-WordPress-importer stub are in `src/`. Next: install deps, add the Astro
-integration (build + AEO emitters), then migrate **naam.one** off WordPress and
-deploy the blog to **Cloudflare Pages**, mounted at `naam.one/blog`.
+**Engine working end-to-end.** CLI: `init` · `new` · `status` · `doctor` ·
+`import wordpress` · **`build`** · **`preview`**. The Astro rendering layer (v1)
+produces a static site with the AEO surface — JSON-LD, sitemap, RSS, `llms.txt`,
+`/raw` markdown twins, JSON API — with drafts excluded from production. See
+`examples/playground/` for a buildable reference site.
 
-Layout: this repo is the engine package (`@vijayatech/glint`). Each brand site
-(e.g. `vijayatechlabs/naam-blog`) is a separate repo that installs the engine.
+**v2 (next):** category/tag archives, related posts, Pagefind search, auto OG
+images, internal-link registry, then publishing the schema for cross-package reuse.
+
+Layout: this repo is the engine package (`@vijayatech/glint`). Each brand site is
+a separate repo that installs the engine.
 
 ## Confirmed stack (2026-06-02)
 

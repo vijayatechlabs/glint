@@ -1,0 +1,20 @@
+---
+import Base from "../layouts/Base.astro";
+import { pagePosts } from "../posts";
+const posts = await pagePosts();
+---
+
+<Base title="Blog" description="The Glint reference blog.">
+  <h1>Blog</h1>
+  <ul>
+    {
+      posts.map((p) => (
+        <li>
+          <a href={`/blog/${p.id}/`}>{p.data.title}</a>
+          {p.data.draft && <em> — draft</em>}
+          <p>{p.data.summary}</p>
+        </li>
+      ))
+    }
+  </ul>
+</Base>

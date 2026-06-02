@@ -54,11 +54,16 @@ async function main(): Promise<void> {
       await runDoctor(args);
       break;
     }
-    // TODO(Phase 0): build | preview land with the Astro rendering integration.
-    case "build":
-    case "preview":
-      console.log(`\`glint ${cmd}\` is scaffolded but not implemented yet (Astro rendering layer).`);
+    case "build": {
+      const { runBuild } = await import("./commands/build.js");
+      await runBuild(args);
       break;
+    }
+    case "preview": {
+      const { runPreview } = await import("./commands/build.js");
+      await runPreview(args);
+      break;
+    }
     case "-h":
     case "--help":
     case undefined:

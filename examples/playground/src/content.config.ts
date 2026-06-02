@@ -1,0 +1,25 @@
+import { defineCollection, z } from "astro:content";
+import { glob } from "astro/loaders";
+
+// Astro content collection mirroring the Glint frontmatter contract
+// (engine source of truth: @vijayatech/glint → src/content/schema.ts).
+// `glint doctor` is the canonical validator; this schema gives Astro its types
+// and loads Markdown from the repo-root content/ dir (not src/).
+const post = z.object({
+  title: z.string(),
+  summary: z.string(),
+  category: z.string().optional(),
+  tags: z.array(z.string()).default([]),
+  publishedAt: z.coerce.date(),
+  updatedAt: z.coerce.date().optional(),
+  visibility: z.enum(["public", "gated", "members"]).default("public"),
+  draft: z.boolean().default(false),
+  cover: z.object({ src: z.string(), alt: z.string() }).optional(),
+});
+
+const blog = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: "./content/blog" }),
+  schema: post,
+});
+
+export const collections = { blog };
