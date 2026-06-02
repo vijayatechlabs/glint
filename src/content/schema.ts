@@ -43,6 +43,10 @@ const base = z.object({
   // when omitted, so authors/agents rarely need to set it.
   slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "kebab-case slug").optional(),
   summary: z.string().min(1, "summary doubles as the meta description"),
+  // One primary category (broad section) + many granular tags. Both are
+  // validated against the data/categories.md and data/tags.md registries by
+  // `glint doctor` to prevent taxonomy sprawl.
+  category: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "kebab-case category slug").optional(),
   tags: z.array(z.string()).default([]),
   publishedAt: z.coerce.date(),
   updatedAt: z.coerce.date().optional(),

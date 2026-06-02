@@ -127,6 +127,28 @@ const voiceTemplate = (brand: string) =>
 - Internal links to related posts + the product. Real alt text on every image.
 `;
 
+const categoriesTemplate = (brand: string) =>
+  `# Categories
+
+Controlled vocabulary for ${brand}. **One primary category per post.** Keep this
+list short. \`glint doctor\` warns if a post uses a category not listed here.
+Format: a \`##\` heading (display name), a \`slug:\` line, then a one-line description
+(used as on-page copy on the category archive).
+
+## Example Category
+slug: example-category
+What this category covers and why a reader should care.
+`;
+
+const tagsTemplate = (brand: string) =>
+  `# Tags
+
+Controlled vocabulary for ${brand}. Many granular tags; reuse before inventing.
+\`glint doctor\` warns on unlisted tags. Format: \`- slug — description\`.
+
+- example-tag — what this tag covers
+`;
+
 export async function runNew(args: string[]): Promise<void> {
   const flags = new Map<string, string>();
   for (let i = 0; i < args.length; i++) {
@@ -149,6 +171,8 @@ export async function runNew(args: string[]): Promise<void> {
   w("data/site.config.ts", siteConfig(brand, domain, baseUrl, collections, mount, target));
   w("data/team.json", "[]\n");
   w("data/links.json", "{}\n");
+  w("data/categories.md", categoriesTemplate(brand));
+  w("data/tags.md", tagsTemplate(brand));
   w("redirects.json", "[]\n");
   w("public/media/.gitkeep", "");
   w("docs/brand-voice.md", voiceTemplate(brand));

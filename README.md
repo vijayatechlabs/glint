@@ -2,6 +2,10 @@
 
 > The lightning publishing engine for the AI era.
 > **Git-native · static-output · agent-first · edge-delivered · AEO-native.**
+>
+> A **fluid SEO & AEO content framework**: write Markdown to a fixed contract; the
+> build auto-emits structured data, markdown twins, `llms.txt`, feeds, internal
+> links, and search — no per-post SEO busywork.
 
 Glint is a reusable publishing engine for VijayaTech's own and client brands.
 Content is **Markdown + JSON in git**; an **AI agent authors** from inside the
@@ -35,7 +39,10 @@ Layout: this repo is the engine package (`@vijayatech/glint`). Each brand site
 
 ## Docs
 
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — the source of truth (layers, contract, roadmap, decisions).
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — layers, contract, roadmap, decisions.
+- [`docs/AGENT-GUIDE.md`](docs/AGENT-GUIDE.md) — the agent-agnostic operating contract.
+- [`docs/INIT.md`](docs/INIT.md) — the state-aware init system (fresh/migration/adopt/established).
+- [`docs/BLOG-SPEC.md`](docs/BLOG-SPEC.md) — the SEO/AEO content spec + definition of done.
 - [`docs/concept.md`](docs/concept.md) — original brainstorm that seeded the design.
 
 ## Roadmap

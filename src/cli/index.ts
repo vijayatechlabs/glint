@@ -9,6 +9,7 @@
 const COMMANDS = {
   init: "Analyse a repo, detect its state (fresh/migration/adopt), print a plan",
   new: "Scaffold/complete a brand site's structure + agent files (idempotent)",
+  status: "Content board — list every post by status (draft/scheduled/published)",
   build: "Build static HTML + JSON/MD content API + AEO surface",
   preview: "Preview the built site locally",
   doctor: "Validate schema, alt text, and internal links (the pre-merge gate)",
@@ -36,6 +37,11 @@ async function main(): Promise<void> {
     case "new": {
       const { runNew } = await import("./commands/new.js");
       await runNew(args);
+      break;
+    }
+    case "status": {
+      const { runStatus } = await import("./commands/status.js");
+      await runStatus(args);
       break;
     }
     case "import": {
