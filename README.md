@@ -43,6 +43,7 @@ a separate repo that installs the engine.
 
 ## Docs
 
+- [`docs/GETTING-STARTED.md`](docs/GETTING-STARTED.md) — **start here** — how to begin in Claude / Gemini-Antigravity / Codex, for any project state.
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — layers, contract, roadmap, decisions.
 - [`docs/AGENT-GUIDE.md`](docs/AGENT-GUIDE.md) — the agent-agnostic operating contract.
 - [`docs/INIT.md`](docs/INIT.md) — the state-aware init system (fresh/migration/adopt/established).
