@@ -93,8 +93,8 @@ the site. (Self-hosted Umami on the Coolify VPS is the alternative.)
 ## 9. Definition of done
 
 - `glint status` — content board (✅ implemented).
-- `glint doctor` — schema + alt text + taxonomy-registry + broken-internal-link
-  validation; flags draft/scheduled correctly.
+- `glint doctor` — schema + scaffolding + taxonomy-registry + dup-slug +
+  broken-internal-link validation; fails (exit 1) on any ERROR (✅ implemented).
 - `glint build` — static HTML honoring §1 draft rules, emitting the full §4 AEO
   surface, §5 internal links, §6 search index, archives, and the JSON/MD API.
 - `glint preview` — local dev with drafts visible + `DRAFT`/`noindex` banner.

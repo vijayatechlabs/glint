@@ -66,9 +66,9 @@ Steps 5–8 are the loop you repeat per post or batch.
 | `glint new [--brand --domain --collections --mount --target]` | Scaffold/complete structure + agent files + taxonomy registries (idempotent) |
 | `glint status [--dir .]` | Content board — every post by status (draft/scheduled/published) |
 | `glint import wordpress --wxr <f> --out <repo>` | WXR → Markdown drafts + media + `redirects.json` + audit |
-| `glint build` | Static HTML + JSON/MD API + AEO surface *(pending)* |
-| `glint preview` | Local preview *(pending)* |
-| `glint doctor` | Validate schema, alt text, internal links, scaffolding leaks *(pending)* |
+| `glint doctor [--dir .]` | Validate schema, scaffolding leaks, taxonomy registry, dup slugs, broken internal links (fails on ERROR) |
+| `glint build` | Static HTML + JSON/MD API + AEO surface *(pending — rendering layer)* |
+| `glint preview` | Local preview with drafts visible *(pending — rendering layer)* |
 
 Run in dev via `pnpm glint <cmd>` from the engine, or the installed `glint` bin.
 

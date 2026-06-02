@@ -14,6 +14,7 @@ import { mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import TurndownService from "turndown";
 import { stringify } from "yaml";
+import { lineIsScaffolding } from "../lib/scaffolding.js";
 
 export interface ImportResult {
   posts: number;
@@ -69,15 +70,8 @@ function stripScaffolding(md: string, title: string): [string, boolean] {
   const before = md;
   let out = md
     .split("\n")
-    .filter(
-      // Drop lines that are leaked generation scaffolding. Each must end in a
-      // colon (e.g. "Meta Description:", "SEO-Optimized Title:") so we never
-      // strip legitimate prose.
-      (line) =>
-        !/^\s*\**\s*(meta description|seo[-\s]*optimized\s*title|seo\s*title|seo\s*slug|slug|alt text|focus key(?:word|phrase)|suggested\s*(?:title|slug)|h1|title)\b[^:：\n]{0,40}[:：]/i.test(
-          line,
-        ),
-    )
+    // Drop lines that are leaked generation scaffolding (shared detector).
+    .filter((line) => !lineIsScaffolding(line))
     .join("\n");
   // drop a leading echo of the title (with or without markdown heading marks)
   const norm = (x: string) => x.replace(/[#*\s]/g, "").toLowerCase();

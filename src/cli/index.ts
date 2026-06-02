@@ -49,12 +49,15 @@ async function main(): Promise<void> {
       await runImport(args);
       break;
     }
-    // TODO(Phase 0): build | preview | doctor land alongside the Astro
-    // integration. Stubbed deliberately so the surface is visible and stable.
+    case "doctor": {
+      const { runDoctor } = await import("./commands/doctor.js");
+      await runDoctor(args);
+      break;
+    }
+    // TODO(Phase 0): build | preview land with the Astro rendering integration.
     case "build":
     case "preview":
-    case "doctor":
-      console.log(`\`glint ${cmd}\` is scaffolded but not implemented yet (Phase 0).`);
+      console.log(`\`glint ${cmd}\` is scaffolded but not implemented yet (Astro rendering layer).`);
       break;
     case "-h":
     case "--help":
