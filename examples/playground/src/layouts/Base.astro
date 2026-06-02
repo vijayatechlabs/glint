@@ -5,7 +5,7 @@ interface Props {
   canonical?: string;
   image?: string;
   noindex?: boolean;
-  jsonLd?: Record<string, unknown>;
+  jsonLd?: Record<string, unknown> | unknown[];
 }
 const { title, description, canonical, image, noindex, jsonLd } = Astro.props;
 const canon = canonical ?? new URL(Astro.url.pathname, Astro.site).href;

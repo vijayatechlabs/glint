@@ -15,7 +15,7 @@ const url = new URL(`/blog/${post.id}/`, Astro.site).href;
 const words = post.body?.trim().split(/\s+/).length ?? 0;
 const readingTime = Math.max(1, Math.round(words / 200));
 
-const jsonLd = {
+const blogPosting = {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
   headline: post.data.title,
@@ -25,6 +25,15 @@ const jsonLd = {
   mainEntityOfPage: url,
   ...(post.data.cover ? { image: new URL(post.data.cover.src, Astro.site).href } : {}),
 };
+
+const breadcrumb = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: new URL("/", Astro.site).href },
+    { "@type": "ListItem", position: 2, name: post.data.title, item: url },
+  ],
+};
 ---
 
 <Base
@@ -33,7 +42,7 @@ const jsonLd = {
   canonical={url}
   image={post.data.cover?.src}
   noindex={post.data.draft}
-  jsonLd={jsonLd}
+  jsonLd={[blogPosting, breadcrumb]}
 >
   {post.data.draft && <p><strong>⚠ DRAFT — not published (preview only)</strong></p>}
   <article>
