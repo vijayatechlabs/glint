@@ -5,8 +5,9 @@
  * and agent files. Idempotent: only writes files that don't already exist, so it
  * is safe to run on a partially set-up repo to fill the gaps.
  */
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 function writeIfMissing(path: string, content: string, created: string[], skipped: string[]): void {
   if (existsSync(path)) {
@@ -17,6 +18,68 @@ function writeIfMissing(path: string, content: string, created: string[], skippe
   writeFileSync(path, content);
   created.push(path);
 }
+
+/** Recursively copy the engine's Astro theme templates into the site, stripping
+ *  the `.tmpl` suffix and never overwriting existing files. The `.tmpl` suffix
+ *  keeps the templates out of the engine's own typecheck. */
+function copyTheme(themeRoot: string, dest: string, created: string[], skipped: string[]): void {
+  if (!existsSync(themeRoot)) return;
+  const walk = (rel: string): void => {
+    for (const entry of readdirSync(join(themeRoot, rel), { withFileTypes: true })) {
+      const childRel = rel ? join(rel, entry.name) : entry.name;
+      if (entry.isDirectory()) walk(childRel);
+      else {
+        const outRel = childRel.replace(/\.tmpl$/, "");
+        writeIfMissing(join(dest, outRel), readFileSync(join(themeRoot, childRel), "utf8"), created, skipped);
+      }
+    }
+  };
+  walk("");
+}
+
+const packageJson = (slug: string) =>
+  JSON.stringify(
+    {
+      name: slug,
+      type: "module",
+      private: true,
+      scripts: { dev: "astro dev", build: "astro build", preview: "astro preview" },
+      dependencies: {
+        astro: "^6.0.0",
+        "@astrojs/rss": "^4.0.11",
+        "@astrojs/sitemap": "^3.3.0",
+      },
+    },
+    null,
+    2,
+  ) + "\n";
+
+const astroConfig = (siteUrl: string) =>
+  `import { defineConfig } from "astro/config";
+import sitemap from "@astrojs/sitemap";
+
+export default defineConfig({
+  site: ${JSON.stringify(siteUrl)},
+  integrations: [sitemap()],
+});
+`;
+
+const themeCss = (brand: string) =>
+  `/* ${brand} — brand design tokens.
+   Mirror your main app's palette + typography here so the blog matches the app.
+   The Glint theme consumes these CSS custom properties. */
+:root {
+  --bg: #ffffff;
+  --fg: #1a1a1a;
+  --link: #2563eb;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --maxw: 720px;
+}
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-sans); line-height: 1.6; }
+main { max-width: var(--maxw); margin: 0 auto; padding: 2rem 1.25rem; }
+a { color: var(--link); }
+article :is(h1, h2, h3) { line-height: 1.25; }
+`;
 
 const siteConfig = (brand: string, domain: string, baseUrl: string, collections: string[], mount: string, target: string) =>
   `// Brand config. The engine reads this to theme + wire collections.
@@ -180,6 +243,14 @@ export async function runNew(args: string[]): Promise<void> {
   w("GEMINI.md", `# GEMINI.md\n\n${pointer(brand)}`);
   w("CLAUDE.md", `# CLAUDE.md\n\n${pointer(brand)}`);
   w(".agents/rules/glint.md", workspaceRule(brand));
+
+  // Astro rendering layer: brand-aware generated files + the copied theme.
+  const slug = brand.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "site";
+  w("package.json", packageJson(slug));
+  w("astro.config.ts", astroConfig(`https://${domain}`));
+  w("public/theme.css", themeCss(brand));
+  const themeRoot = fileURLToPath(new URL("../../scaffold/theme", import.meta.url));
+  copyTheme(themeRoot, dir, created, skipped);
 
   console.log(`\nglint new — ${brand} (${domain}), collections [${collections.join(", ")}], mount "${mount || "/"}", target ${target}\n`);
   console.log(`  created (${created.length}):`);

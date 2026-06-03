@@ -1,5 +1,5 @@
 {
-  "name": "glint-playground",
+  "name": "glint",
   "type": "module",
   "private": true,
   "scripts": {
@@ -8,7 +8,7 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "astro": "^5.6.0",
+    "astro": "^6.0.0",
     "@astrojs/rss": "^4.0.11",
     "@astrojs/sitemap": "^3.3.0"
   }

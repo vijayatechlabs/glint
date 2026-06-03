@@ -1,0 +1,14 @@
+/* Glint — brand design tokens.
+   Mirror your main app's palette + typography here so the blog matches the app.
+   The Glint theme consumes these CSS custom properties. */
+:root {
+  --bg: #ffffff;
+  --fg: #1a1a1a;
+  --link: #2563eb;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --maxw: 720px;
+}
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-sans); line-height: 1.6; }
+main { max-width: var(--maxw); margin: 0 auto; padding: 2rem 1.25rem; }
+a { color: var(--link); }
+article :is(h1, h2, h3) { line-height: 1.25; }
