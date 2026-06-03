@@ -10,7 +10,8 @@
 **Predecessor doc:** [`StaticBlog-concept.md`](StaticBlog-concept.md)
 
 **Confirmed 2026-06-02:** (1) Name **Glint** · (2) Framework **Astro** ·
-(3) Host **Hostinger VPS + Coolify** (self-hosted, Docker/Traefik) ·
+(3) Host **agnostic** — static `dist/` deploys anywhere; default **Cloudflare Pages**,
+also Vercel / Netlify / VPS+Coolify (per-brand `deployTarget`) ·
 (4) Pilot **naam.one** — migrate off WordPress · (5) Client dashboard tier **deferred to Phase 4**.
 
 ---
@@ -198,45 +199,29 @@ a brand ever grows large, Astro incremental build covers it. Static stays static
 
 ---
 
-### LAYER 3 — Deliver (Hostinger VPS + Coolify)
+### LAYER 3 — Deliver (host-agnostic)
 
-Self-hosted, owned, one box to reason about. Coolify is the open-source PaaS
-(Heroku/Netlify-style DX) that manages Docker containers + Traefik reverse proxy +
-auto-TLS + git-push deploys on the VPS.
+`glint build` emits a plain static `dist/` (HTML + JSON/MD API + AEO surface), so
+**Glint deploys to any static host.** The host is a swappable choice per brand,
+recorded as `deployTarget` in `data/site.config.ts` — never baked into the engine.
 
-```
-            Cloudflare (free plan)  →  DNS + CDN cache + TLS + DDoS in FRONT
-                       │                (optional but recommended — keeps the
-                       │                 read path globally fast; origin = VPS)
-                       ▼
- ┌──────────────────── Hostinger VPS ──────────────────────────────┐
- │  Coolify  →  manages everything below via Docker + Traefik       │
- │                                                                  │
- │  [static-site container]   Nginx/Caddy serving glint build       │
- │                            output (the read path — the bulk)     │
- │                                                                  │
- │  [edge-service container]  Astro Node adapter (or Hono) — THIN    │
- │                            dynamic logic only:                   │
- │                              • auth gate on `visibility: gated`  │
- │                              • lead/form capture                 │
- │                              • IndexNow ping on deploy           │
- │                              • on-demand content-API if needed   │
- │                                                                  │
- │  [MinIO container]         S3-compatible object storage for      │
- │                            heavy media (swappable for Bunny/R2)  │
- │                                                                  │
- │  Traefik routing  →  mounts /blog onto an app by path (the       │
- │                      Superblog trick, done in Coolify config)    │
- └──────────────────────────────────────────────────────────────────┘
-```
+**Recommended default order:**
 
-The dynamic service is stateless and tiny. The moment we need per-user logic we add
-a *check*, not a server rendering pages from a DB. The bulk stays static.
+| Target | Best when | Mount `/blog` onto an app | Dynamic layer (gating/forms/IndexNow) |
+|---|---|---|---|
+| **Cloudflare Pages** (default) | content sites; DNS already on Cloudflare; zero-ops | CF Worker / routing rule | CF Worker |
+| **Vercel** | the brand's app is already on Vercel/Next | rewrites / middleware | Vercel functions / Edge Middleware |
+| **VPS + Coolify** | full ownership / cost-at-scale across many client sites | Traefik path routing | Astro Node adapter (or Hono) container |
+| Netlify | git-deploy + an existing Netlify app | rewrites / Edge Functions | Netlify Functions |
 
-**Why Cloudflare-in-front (recommended, optional):** keeps global edge caching, TLS,
-and DDoS for free without changing the host. The VPS is a single-region origin;
-Cloudflare's cache makes static delivery globally fast anyway. Drop it if you want
-pure VPS-only — fine at these volumes, just single-region latency.
+The **read path is always static on a CDN.** The **thin dynamic layer** (gating on
+`visibility: gated`, lead capture, IndexNow ping) is optional and adapts to the
+host — a Cloudflare Worker, a Vercel/Netlify function, or a small Node container on
+the VPS. We add a stateless *check*, never a server rendering pages from a DB.
+
+**Media:** small images in-repo (build-optimized); heavy media to an S3-compatible
+store — R2 (Cloudflare), Bunny, or self-hosted MinIO — referenced by the same
+`s3://` convention, so the store is swappable without touching content.
 
 ---
 
