@@ -31,7 +31,7 @@ layout and matches your brand via **tokens** — not custom themes.
 
 ## Status
 
-**Engine complete end-to-end.** CLI: `onboard · init · new · status · doctor ·
+**v1: Blog engine — complete end-to-end.** CLI: `onboard · init · new · status · doctor ·
 import · build · preview · feedback · theme`.
 
 - **Onboard any brand in one command** — `glint onboard --app <repo> --apply`
@@ -41,9 +41,17 @@ import · build · preview · feedback · theme`.
   **Pagefind search**; drafts excluded from production.
 - **Brand blend** — token-styled static header/footer; `glint theme pull` pulls an
   app's Tailwind/CSS tokens into `theme.css`; `custom.css` escape hatch.
+- **Mount-correct** — assets use absolute URLs from `site.baseUrl` so the blog
+  loads correctly when proxied at `domain.com/blog`. Logo links to the main domain.
+- **`doctor` is the real gate** — broken internal links are errors; published posts
+  linking to drafts are flagged; unfilled brand voice/strategy blocks publishing.
 - **Packaged** — builds with tsup to `dist/`; importable
   (`import { blog } from "@vijayatech/glint/schema"`) and installable as a git
-  dependency (builds on install via `prepare`).
+  dependency. Brand repos import the engine schema directly — no manual sync.
+
+**Non-blog collections** (`events`, `profiles`, `case-studies`, `news`): Zod schemas
+are done and `glint doctor` validates them. Page rendering (routes, RSS, JSON API)
+is **Phase 2**. Running `glint new --collections events` will warn clearly.
 
 See `examples/playground/` for a buildable reference site, `docs/FEEDBACK.md` for
 the read-only-engine feedback loop.

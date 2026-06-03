@@ -1,18 +1,22 @@
 ---
 import Base from "../../layouts/Base.astro";
-// Static, in-browser search via Pagefind. The /pagefind/* bundle is generated
-// after `astro build` by the `pagefind --site dist` step (see package.json build).
+import { site } from "../../../data/site.config";
+// Pagefind bundle is at the blog root, so derive absolute URLs from site.baseUrl
+// to work correctly whether the blog is standalone or mounted at a sub-path.
+const siteBase = site.baseUrl.replace(/\/?$/, "");
+const pagefindCss = `${siteBase}/pagefind/pagefind-ui.css`;
+const pagefindJs = `${siteBase}/pagefind/pagefind-ui.js`;
 ---
 
 <Base title="Search" description="Search the blog" noindex={true}>
   <h1>Search</h1>
-  <link rel="stylesheet" href="/pagefind/pagefind-ui.css" />
+  <link rel="stylesheet" href={pagefindCss} />
   <div id="search"></div>
-  <script src="/pagefind/pagefind-ui.js" is:inline></script>
-  <script is:inline>
-    window.addEventListener("DOMContentLoaded", () => {
-      // PagefindUI is provided by the bundle injected at build time.
-      new PagefindUI({ element: "#search", showSubResults: true, showImages: false });
-    });
+  <script define:vars={{ pagefindJs }}>
+    // Load Pagefind UI from its absolute URL (supports any mount path).
+    const s = document.createElement("script");
+    s.src = pagefindJs;
+    s.onload = () => new PagefindUI({ element: "#search", showSubResults: true, showImages: false });
+    document.head.appendChild(s);
   </script>
 </Base>

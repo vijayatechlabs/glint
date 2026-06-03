@@ -1,6 +1,7 @@
 ---
 import { render } from "astro:content";
 import Base from "../../layouts/Base.astro";
+import { site } from "../../../data/site.config";
 import { pagePosts, publicPosts, relatedTo } from "../../posts";
 
 export async function getStaticPaths() {
@@ -30,7 +31,8 @@ const breadcrumb = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
-    { "@type": "ListItem", position: 1, name: "Home", item: new URL("/", Astro.site).href },
+    // Home points to the main domain — the blog is embedded in the wider site.
+    { "@type": "ListItem", position: 1, name: "Home", item: `https://${site.domain}` },
     { "@type": "ListItem", position: 2, name: post.data.title, item: url },
   ],
 };

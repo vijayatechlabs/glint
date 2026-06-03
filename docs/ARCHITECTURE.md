@@ -14,6 +14,14 @@
 also Vercel / Netlify / VPS+Coolify (per-brand `deployTarget`) ·
 (4) Pilot **naam.one** — migrate off WordPress · (5) Client dashboard tier **deferred to Phase 4**.
 
+> **v1 scope (current):** Blog-only, static, agent-native. The engine renders one
+> collection — `blog` — with full output: pages, RSS, sitemap, `llms.txt`, raw
+> markdown twins, JSON API, Pagefind search, category/tag archives, related posts,
+> and draft-exclusion. Non-blog collections (`events`, `profiles`, `case-studies`,
+> `news`) have Zod schemas and `glint doctor` validation, but **page rendering is
+> Phase 2**. V1's promise: "drop a reliable, agent-ready static blog into any site
+> at `/blog`."
+
 ---
 
 ## 1. The one-liner
@@ -129,6 +137,13 @@ the config + content.
 **Why a package, not a fork-per-brand:** engine improvements (a new schema field,
 an AEO fix, a faster build) propagate to every brand with a version bump. This is
 the "teach the team once" lever.
+
+> **Architecture note (v1):** The Astro rendering layer (pages, layouts, components)
+> is currently scaffolded into each brand repo via `glint new`. This is pragmatic
+> for Phase 0–1. Phase 2 migrates it to a proper Astro integration with
+> `injectRoute`, so the engine owns routes and brand repos own only content + config
+> + token overrides. Schema, CLI, and validators are already importable from
+> `@vijayatech/glint` as a package.
 
 ---
 
@@ -394,10 +409,10 @@ brand = `glint new`, edit config, deploy — live in a day.
 
 | Phase | Goal | Exit criteria |
 |---|---|---|
-| **0 — Spike + Migrate** | Engine skeleton + **naam.one migrated off WordPress**, deployed on Coolify | naam.one case-studies render as static HTML via Coolify with JSON-LD + sitemap; WP content + media imported |
+| **0 — Spike + Migrate** | Engine skeleton + blog-only v1 + naam.one off WordPress | Blog builds, mounts at `/blog/` with correct asset URLs; doctor is the real gate; naam.one deploys on Coolify |
 | **1 — Agent loop** | Draft → file → PR → deploy | A voice/note publishes a post via PR with zero dashboard |
-| **2 — Decouple** | Content API + gated tier + `/blog` proxy mount | App consumes `/api/*.json`; a gated post works; `/blog` mounts onto an app via Traefik |
-| **3 — Scale** | MinIO media + multi-brand cloning + AEO polish | 2+ brands live from the same engine; llms.txt/twins verified |
+| **2 — Decouple + multi-collection** | Astro integration (`injectRoute`) + non-blog rendering + content API gating | Brand repo depends on `@vijayatech/glint`; no copied Astro pages; events/profiles/case-studies have routes; gated post works |
+| **3 — Scale** | MinIO media + multi-brand cloning + AEO polish | 2+ brands live from same engine; llms.txt/twins verified |
 | **4 — Optional** | Client dashboard tier (EmDash) for non-tech editors | One client self-publishes without touching git |
 
 ### Phase 0 — naam.one WordPress migration (sub-steps)

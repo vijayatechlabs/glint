@@ -3,10 +3,12 @@
 import { site } from "../../data/site.config";
 const nav = (site as { nav?: { label: string; href: string }[] }).nav ?? [];
 const logo = (site as { logo?: string }).logo;
+// Logo goes to the main site root, not the blog — the blog is embedded in the app.
+const mainSite = `https://${site.domain}`;
 ---
 
 <header class="site-header">
-  <a class="brand" href="/">
+  <a class="brand" href={mainSite}>
     {logo ? <img src={logo} alt={site.brand} height="28" /> : site.brand}
   </a>
   <nav>

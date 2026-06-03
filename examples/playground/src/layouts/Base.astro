@@ -15,6 +15,8 @@ interface Props {
 const { title, description, canonical, image, noindex, jsonLd } = Astro.props;
 const canon = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = image ? new URL(image, Astro.site).href : undefined;
+// Strip trailing slash so we can safely append asset paths.
+const siteBase = site.baseUrl.replace(/\/?$/, "");
 ---
 
 <!doctype html>
@@ -37,9 +39,10 @@ const ogImage = image ? new URL(image, Astro.site).href : undefined;
 
     <link rel="alternate" type="application/rss+xml" title="RSS" href={new URL("/rss.xml", Astro.site).href} />
 
-    <!-- Brand tokens (regenerate with `glint theme pull`) then per-brand overrides. -->
-    <link rel="stylesheet" href="/theme.css" />
-    <link rel="stylesheet" href="/custom.css" />
+    <!-- Brand tokens: absolute URLs so the blog loads them correctly when mounted
+         at a sub-path (e.g. domain.com/blog). Regenerate with `glint theme pull`. -->
+    <link rel="stylesheet" href={`${siteBase}/theme.css`} />
+    <link rel="stylesheet" href={`${siteBase}/custom.css`} />
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
   </head>
   <body>

@@ -45,7 +45,11 @@ export async function runDoctor(args: string[]): Promise<void> {
   const add = (file: string, severity: Severity, msg: string) => findings.push({ file, severity, msg });
 
   // valid published paths for internal-link resolution: /<collection>/<slug>
-  const validPaths = new Set(posts.map((p) => `/${p.collection}/${p.slug}`));
+  // Drafts are intentionally excluded — a published post must not link to a draft
+  // (the draft is invisible in production, creating a real 404).
+  const validPaths = new Set(
+    posts.filter((p) => p.data.draft !== true).map((p) => `/${p.collection}/${p.slug}`),
+  );
   const slugSeen = new Map<string, string>(); // collection/slug -> file
 
   for (const p of posts) {
@@ -90,18 +94,31 @@ export async function runDoctor(args: string[]): Promise<void> {
       const target = m[1]!.replace(/\/$/, "");
       const looksLikePost = new RegExp(`^/(${KNOWN_COLLECTIONS.join("|")})/`).test(target);
       if (looksLikePost && !validPaths.has(target)) {
-        add(p.file, "WARN", `internal link to "${m[1]}" doesn't resolve to a known post`);
+        // ERROR: broken links create real 404s in production. Drafts are excluded
+        // from validPaths intentionally — linking to a draft is a broken link.
+        add(p.file, "ERROR", `broken internal link to "${m[1]}" — not found among published posts (is the target a draft or does the slug not exist?)`);
       }
     }
   }
 
   // 6. onboarding completeness: template files still carrying placeholders
+  // If ANY non-draft post exists the site is intended to publish, so unfilled
+  // brand strategy/voice files block the gate (ERROR). While everything is still
+  // in draft it stays a WARN — fine to be setting up.
+  const hasPublishedPosts = posts.some((p) => p.data.draft !== true);
   for (const { file, markers } of TEMPLATE_FILES) {
     const p = join(dir, file);
     if (!existsSync(p)) continue;
     const text = readFileSync(p, "utf8");
     if (markers.some((re) => re.test(text))) {
-      add(file, "WARN", "still has template placeholders — fill it before publishing (run `glint onboard` or edit it)");
+      const sev: Severity = hasPublishedPosts ? "ERROR" : "WARN";
+      add(
+        file,
+        sev,
+        hasPublishedPosts
+          ? "brand placeholder not filled — blocks publishing (run `glint onboard` or edit it)"
+          : "still has template placeholders — fill it before publishing (run `glint onboard` or edit it)",
+      );
     }
   }
 

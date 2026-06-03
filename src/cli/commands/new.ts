@@ -65,6 +65,8 @@ const packageJson = (slug: string) =>
         preview: "astro preview",
       },
       dependencies: {
+        // Engine: schema, CLI, validators — single source of truth for the contract.
+        "@vijayatech/glint": "git+https://github.com/vijayatechlabs/glint.git",
         astro: "^6.0.0",
         "@astrojs/rss": "^4.0.11",
         "@astrojs/sitemap": "^3.3.0",
@@ -365,6 +367,16 @@ export async function runNew(args: string[]): Promise<void> {
   copyTheme(scaffoldDir("theme"), dir, created, skipped);
   // ship the content playbook (static engine reference) into the brand's docs/
   copyTheme(scaffoldDir("docs"), join(dir, "docs"), created, skipped);
+
+  // Warn about non-blog collections: schemas are registered and doctor validates them,
+  // but page rendering (routes, API, raw twins) is blog-only in v1 (Phase 2 roadmap).
+  const nonBlog = collections.filter((c) => c !== "blog");
+  for (const col of nonBlog) {
+    console.warn(
+      `  ⚠  collection "${col}": schema registered and doctor-validated, but page rendering\n` +
+      `     (routes, RSS, JSON API) is blog-only in v1. Content folders created; rendering Phase 2.`,
+    );
+  }
 
   console.log(`\nglint new — ${brand} (${domain}), collections [${collections.join(", ")}], mount "${mount || "/"}", target ${target}\n`);
   console.log(`  created (${created.length}):`);
