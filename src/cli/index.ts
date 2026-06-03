@@ -10,6 +10,7 @@ const COMMANDS = {
   init: "Analyse a repo, detect its state (fresh/migration/adopt), print a plan",
   new: "Scaffold/complete a brand site's structure + agent files (idempotent)",
   status: "Content board — list every post by status (draft/scheduled/published)",
+  feedback: "Record structured feedback for the engine (projects never edit Glint)",
   build: "Build static HTML + JSON/MD content API + AEO surface",
   preview: "Preview the built site locally",
   doctor: "Validate schema, alt text, and internal links (the pre-merge gate)",
@@ -42,6 +43,11 @@ async function main(): Promise<void> {
     case "status": {
       const { runStatus } = await import("./commands/status.js");
       await runStatus(args);
+      break;
+    }
+    case "feedback": {
+      const { runFeedback } = await import("./commands/feedback.js");
+      await runFeedback(args);
       break;
     }
     case "import": {

@@ -41,6 +41,16 @@ cover: { src: /media/<slug>.png, alt: "describes the image + relevance" }
 4. A human reviews voice + accuracy, merges, flips `draft: false`.
 
 ## Don't
-Don't deploy, touch DNS, flip drafts live, or push to `main`.
+- Don't deploy, touch DNS, flip drafts live, or push to `main`.
+- 🔒 **Don't modify the Glint engine** (`@vijayatech/glint` or any nested `glint/`
+  clone). It's shared and read-only here.
 
-Engine reference: `@vijayatech/glint` → `docs/AGENT-GUIDE.md`, `docs/INIT.md`.
+## Found a gap or bug in Glint?
+**File feedback — don't patch the engine.** Run:
+```
+glint feedback "what's missing or broken" --type enhancement --area build
+```
+It logs to `glint-feedback.md` and prints a GitHub issue for the engine repo.
+The maintainer changes Glint; you pull the update.
+
+Engine reference: `@vijayatech/glint` → `docs/AGENT-GUIDE.md`, `docs/INIT.md`, `docs/FEEDBACK.md`.

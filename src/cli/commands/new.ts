@@ -142,9 +142,19 @@ cover: { src: /media/<slug>.png, alt: "describes the image + relevance" }
 4. A human reviews voice + accuracy, merges, flips \`draft: false\`.
 
 ## Don't
-Don't deploy, touch DNS, flip drafts live, or push to \`main\`.
+- Don't deploy, touch DNS, flip drafts live, or push to \`main\`.
+- 🔒 **Don't modify the Glint engine** (\`@vijayatech/glint\` or any nested \`glint/\`
+  clone). It's shared and read-only here.
 
-Engine reference: \`@vijayatech/glint\` → \`docs/AGENT-GUIDE.md\`, \`docs/INIT.md\`.
+## Found a gap or bug in Glint?
+**File feedback — don't patch the engine.** Run:
+\`\`\`
+glint feedback "what's missing or broken" --type enhancement --area build
+\`\`\`
+It logs to \`glint-feedback.md\` and prints a GitHub issue for the engine repo.
+The maintainer changes Glint; you pull the update.
+
+Engine reference: \`@vijayatech/glint\` → \`docs/AGENT-GUIDE.md\`, \`docs/INIT.md\`, \`docs/FEEDBACK.md\`.
 `;
 
 const pointer = (brand: string) =>
@@ -160,6 +170,7 @@ This is the ${brand} site on the Glint engine. For every task:
 - Read \`docs/brand-voice.md\` and enforce it before writing content.
 - Draft-first, PR-gated: keep \`draft: true\`, branch \`content/<slug>\`, never push to \`main\`, never publish or deploy.
 - A post must genuinely deliver its title. No generic AI filler.
+- 🔒 Never modify the Glint engine. Report gaps with \`glint feedback "…"\` instead.
 `;
 
 const voiceTemplate = (brand: string) =>

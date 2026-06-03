@@ -1,0 +1,41 @@
+name: Glint feedback
+description: Report a gap, bug, or idea from a project using Glint (projects don't edit the engine — they file this).
+title: "[feedback]: "
+labels: ["feedback"]
+body:
+  - type: input
+    id: project
+    attributes:
+      label: Project
+      description: Which site surfaced this (e.g. naam-blog)?
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Glint version
+      description: Output of the version line from `glint feedback` (e.g. v0.0.1 (abc1234)).
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      options: [bug, enhancement, aeo, dx, docs]
+    validations:
+      required: true
+  - type: input
+    id: area
+    attributes:
+      label: Area / command
+      description: e.g. build, doctor, new, import, theme, schema
+  - type: textarea
+    id: what
+    attributes:
+      label: What's missing or broken
+      description: Be concrete. Include repro steps for bugs.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change (optional)
+      description: How you'd like Glint to behave. The maintainer refines this.
