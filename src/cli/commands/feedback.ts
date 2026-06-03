@@ -8,7 +8,7 @@
  * The maintainer triages the issues and implements on the engine.
  */
 import { existsSync, readFileSync, appendFileSync, writeFileSync } from "node:fs";
-import { basename, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 
@@ -17,12 +17,32 @@ const TYPES = ["bug", "enhancement", "aeo", "dx", "docs"];
 
 function engineVersion(): string {
   try {
-    const pkgUrl = new URL("../../../package.json", import.meta.url);
-    const pkg = JSON.parse(readFileSync(fileURLToPath(pkgUrl), "utf8"));
-    const root = fileURLToPath(new URL("../../../", import.meta.url));
+    // Walk up from this module to find the engine's own package.json (works from
+    // src/ in dev and dist/ when built/installed; the name check avoids matching
+    // a consumer's package.json).
+    let d = fileURLToPath(new URL(".", import.meta.url));
+    let root = "";
+    let version = "";
+    for (let i = 0; i < 8; i++) {
+      const p = join(d, "package.json");
+      if (existsSync(p)) {
+        try {
+          const j = JSON.parse(readFileSync(p, "utf8"));
+          if (j.name === "@vijayatech/glint") {
+            root = d;
+            version = j.version;
+            break;
+          }
+        } catch { /* keep walking */ }
+      }
+      const parent = dirname(d);
+      if (parent === d) break;
+      d = parent;
+    }
+    if (!version) return "unknown";
     const sha = spawnSync("git", ["-C", root, "rev-parse", "--short", "HEAD"], { encoding: "utf8" });
     const commit = sha.status === 0 ? ` (${sha.stdout.trim()})` : "";
-    return `v${pkg.version}${commit}`;
+    return `v${version}${commit}`;
   } catch {
     return "unknown";
   }
