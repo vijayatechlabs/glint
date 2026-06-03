@@ -29,8 +29,48 @@ pnpm glint init --dir /path/to/your-site     # discover state of any folder
 (Once published, this becomes `pnpm dlx @vijayatech/glint init` from inside the
 site — that's a v2 item.)
 
-Every command takes `--dir` (defaults to the current folder): `init`, `new`,
-`status`, `doctor`, `import`, `build`, `preview`.
+Every command takes `--dir` (defaults to the current folder): `onboard`, `init`,
+`new`, `status`, `doctor`, `import`, `build`, `preview`, `theme`, `feedback`.
+
+### Running the CLI from a project (sibling-clone setup)
+
+The common, reliable setup: keep the engine cloned **next to** your site and run
+the built CLI with the site as the working directory.
+
+```
+parent/
+├── glint/        ← the engine clone
+└── naam-blog/    ← your site (run commands from here)
+```
+
+From inside the site, invoke the engine's built bin — cwd stays in the site, so
+`--dir .` (or the default) targets the site correctly:
+
+```bash
+node ../glint/dist/cli/index.js doctor --dir .
+node ../glint/dist/cli/index.js feedback "…" --type dx --area cli
+```
+
+**Add one script** to the site's `package.json` so it's just `pnpm glint <cmd>`:
+```json
+"scripts": { "glint": "node ../glint/dist/cli/index.js" }
+```
+
+**Update routine (rebuild, don't just pull).** `dist/` is built output — a `git
+pull` alone won't refresh it. Always rebuild after pulling:
+```bash
+git -C ../glint pull && pnpm -C ../glint install   # `prepare` rebuilds ../glint/dist
+node ../glint/dist/cli/index.js --help             # confirm new commands appear
+```
+If `--help` shows fewer commands than expected, the rebuild didn't run — force it
+with `pnpm -C ../glint run build`.
+
+**One-copy rule.** Use a *single* Glint per machine-workflow. If you *also* did
+`pnpm add @vijayatech/glint`, you now have two copies that drift — `pnpm exec
+glint` may run a stale one (symptom: "Unknown command" for a command that exists
+on `main`). Either route everything through the sibling clone (above) **or** the
+installed dependency — not both. To drop the installed one: `pnpm remove
+@vijayatech/glint`.
 
 ---
 
