@@ -9,8 +9,11 @@ The blog for **Glint**, built on **Glint**
 it builds to static HTML at **example.com**. Not WordPress, not a CMS.
 
 ## Always read first
-1. `docs/brand-voice.md` — the voice. Enforce it on every word.
-2. `docs/CONTENT-AUDIT.md` — triage of imported posts (if this was a migration).
+1. `data/content-strategy.md` — what to write & why (pillars, ICP, cadence, rules).
+2. `docs/content-playbook.md` — blog types + how to structure each for answer engines.
+3. `docs/brand-voice.md` — the voice. Enforce it on every word.
+4. `data/categories.md` / `data/tags.md` — the taxonomy to file under.
+5. `docs/CONTENT-AUDIT.md` — triage of imported posts (if this was a migration).
 
 ## Hard rules
 - **Draft-first:** everything stays `draft: true` until a human flips it.
@@ -34,11 +37,21 @@ cover: { src: /media/<slug>.png, alt: "describes the image + relevance" }
 ---
 ```
 
-## Workflow
-1. Pick targets (from the audit or a topic plan).
-2. Write fresh, on-topic, on-voice content; keep `draft: true`.
-3. Branch `content/<slug>`, commit, open a PR with a short rationale.
-4. A human reviews voice + accuracy, merges, flips `draft: false`.
+## Content generation (how to write a post)
+1. **Ideate.** Read `data/content-strategy.md` (pick a Pillar + Type). Scan existing
+   `content/` and `data/content-plan.md` to avoid duplication and find gaps.
+2. **Research.** Use your native web search; **cite sources**; never invent stats or
+   assert decaying facts (prices, "available domains") as permanent.
+3. **Propose titles first.** Offer a short shortlist (log to `data/content-plan.md` as
+   `idea`); let the human pick before drafting. Don't jump straight to a full draft.
+4. **Draft** the chosen title per `docs/content-playbook.md` (answer-first, question
+   headings, a table/steps where it fits, an FAQ, sources). Enforce the brand voice +
+   frontmatter contract; set `category`/`tags` from the registries. Keep `draft: true`.
+5. **Branch `content/<slug>`, run `glint doctor`, open a PR.**
+6. A human reviews voice + accuracy, merges, flips `draft: false`.
+
+Scheduled batches: an agent runner (cron / scheduled task) fires "draft the next N
+approved items from `data/content-plan.md`" — same flow, no engine code.
 
 ## Don't
 - Don't deploy, touch DNS, flip drafts live, or push to `main`.

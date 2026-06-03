@@ -21,18 +21,18 @@ function writeIfMissing(path: string, content: string, created: string[], skippe
 
 /** Locate the engine's scaffold theme, robustly across dev (running from src/)
  *  and published builds (running from dist/, with src/scaffold shipped). */
-function scaffoldThemeDir(): string {
+function scaffoldDir(sub: string): string {
   let d = fileURLToPath(new URL(".", import.meta.url));
   for (let i = 0; i < 8; i++) {
-    const a = join(d, "src", "scaffold", "theme");
+    const a = join(d, "src", "scaffold", sub);
     if (existsSync(a)) return a;
-    const b = join(d, "scaffold", "theme");
+    const b = join(d, "scaffold", sub);
     if (existsSync(b)) return b;
     const parent = dirname(d);
     if (parent === d) break;
     d = parent;
   }
-  throw new Error("Glint scaffold theme not found (expected src/scaffold/theme).");
+  throw new Error(`Glint scaffold not found (expected src/scaffold/${sub}).`);
 }
 
 /** Recursively copy the engine's Astro theme templates into the site, stripping
@@ -142,8 +142,11 @@ The ${collections.join(" / ")} for **${brand}**, built on **Glint**
 it builds to static HTML at **${domain}${mount || ""}**. Not WordPress, not a CMS.
 
 ## Always read first
-1. \`docs/brand-voice.md\` — the voice. Enforce it on every word.
-2. \`docs/CONTENT-AUDIT.md\` — triage of imported posts (if this was a migration).
+1. \`data/content-strategy.md\` — what to write & why (pillars, ICP, cadence, rules).
+2. \`docs/content-playbook.md\` — blog types + how to structure each for answer engines.
+3. \`docs/brand-voice.md\` — the voice. Enforce it on every word.
+4. \`data/categories.md\` / \`data/tags.md\` — the taxonomy to file under.
+5. \`docs/CONTENT-AUDIT.md\` — triage of imported posts (if this was a migration).
 
 ## Hard rules
 - **Draft-first:** everything stays \`draft: true\` until a human flips it.
@@ -167,11 +170,21 @@ cover: { src: /media/<slug>.png, alt: "describes the image + relevance" }
 ---
 \`\`\`
 
-## Workflow
-1. Pick targets (from the audit or a topic plan).
-2. Write fresh, on-topic, on-voice content; keep \`draft: true\`.
-3. Branch \`content/<slug>\`, commit, open a PR with a short rationale.
-4. A human reviews voice + accuracy, merges, flips \`draft: false\`.
+## Content generation (how to write a post)
+1. **Ideate.** Read \`data/content-strategy.md\` (pick a Pillar + Type). Scan existing
+   \`content/\` and \`data/content-plan.md\` to avoid duplication and find gaps.
+2. **Research.** Use your native web search; **cite sources**; never invent stats or
+   assert decaying facts (prices, "available domains") as permanent.
+3. **Propose titles first.** Offer a short shortlist (log to \`data/content-plan.md\` as
+   \`idea\`); let the human pick before drafting. Don't jump straight to a full draft.
+4. **Draft** the chosen title per \`docs/content-playbook.md\` (answer-first, question
+   headings, a table/steps where it fits, an FAQ, sources). Enforce the brand voice +
+   frontmatter contract; set \`category\`/\`tags\` from the registries. Keep \`draft: true\`.
+5. **Branch \`content/<slug>\`, run \`glint doctor\`, open a PR.**
+6. A human reviews voice + accuracy, merges, flips \`draft: false\`.
+
+Scheduled batches: an agent runner (cron / scheduled task) fires "draft the next N
+approved items from \`data/content-plan.md\`" — same flow, no engine code.
 
 ## Don't
 - Don't deploy, touch DNS, flip drafts live, or push to \`main\`.
@@ -255,6 +268,60 @@ Controlled vocabulary for ${brand}. Many granular tags; reuse before inventing.
 - example-tag — what this tag covers
 `;
 
+const contentStrategyTemplate = (brand: string) =>
+  `# Content Strategy — ${brand}
+
+The "brain" agents read before writing. Defines what to write & why. Pair with
+\`docs/content-playbook.md\` (types + AEO frameworks), \`docs/brand-voice.md\` (tone),
+and \`data/categories.md\` / \`data/tags.md\` (taxonomy).
+
+## Mission / Vision
+<Why ${brand} exists and who it serves. Content should advance this.>
+
+## Audience / ICP
+<Who we write for: roles, goals, pains. What decision are we helping them make?>
+
+## Pillars
+The core themes we own. Every post maps to one. (Replace with real pillars.)
+
+1. **<Pillar A>** — <what it covers, why it matters to the ICP>
+2. **<Pillar B>** — <…>
+3. **<Pillar C>** — <…>
+
+## Content types we publish
+Pick from \`docs/content-playbook.md\` (full structures + AEO guidance there):
+guide · how-to / tutorial · listicle · comparison · case study · feature/launch ·
+trends · industry news / analysis · tips · glossary ("what is X?") · FAQ.
+
+## Cadence
+<e.g. 2 posts/week; 1 pillar guide/month. Used for scheduled batches.>
+
+## Research & quality rules
+- Use native web search; **cite sources**; never invent stats.
+- Don't assert decaying facts (prices, "available domains") as permanent.
+- Avoid duplication: scan existing \`content/\` and \`data/content-plan.md\` first.
+- Answer-first, question-based headings, a table/steps where it fits, an FAQ.
+`;
+
+const contentPlanTemplate = (brand: string) =>
+  `# Content Plan — ${brand}
+
+Living backlog. Agents propose titles here (status \`idea\`), you approve
+(\`approved\`), they draft (\`drafting\`), then it ships (\`published\`). Supports
+scheduled batches: "draft the next N approved items."
+
+Format: \`- [status] Pillar · Type · Title — note\`
+
+## Backlog
+- [idea] <Pillar> · listicle · <Working title> — <angle / source>
+
+## Approved (ready to draft)
+
+## Drafting (PR open)
+
+## Published
+`;
+
 export async function runNew(args: string[]): Promise<void> {
   const flags = new Map<string, string>();
   for (let i = 0; i < args.length; i++) {
@@ -279,6 +346,8 @@ export async function runNew(args: string[]): Promise<void> {
   w("data/links.json", "{}\n");
   w("data/categories.md", categoriesTemplate(brand));
   w("data/tags.md", tagsTemplate(brand));
+  w("data/content-strategy.md", contentStrategyTemplate(brand));
+  w("data/content-plan.md", contentPlanTemplate(brand));
   w("redirects.json", "[]\n");
   w("public/media/.gitkeep", "");
   w("docs/brand-voice.md", voiceTemplate(brand));
@@ -293,7 +362,9 @@ export async function runNew(args: string[]): Promise<void> {
   w("astro.config.ts", astroConfig(`https://${domain}`));
   w("public/theme.css", themeCss(brand));
   w("public/custom.css", customCss(brand));
-  copyTheme(scaffoldThemeDir(), dir, created, skipped);
+  copyTheme(scaffoldDir("theme"), dir, created, skipped);
+  // ship the content playbook (static engine reference) into the brand's docs/
+  copyTheme(scaffoldDir("docs"), join(dir, "docs"), created, skipped);
 
   console.log(`\nglint new — ${brand} (${domain}), collections [${collections.join(", ")}], mount "${mount || "/"}", target ${target}\n`);
   console.log(`  created (${created.length}):`);
