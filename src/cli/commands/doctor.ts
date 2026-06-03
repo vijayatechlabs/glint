@@ -6,9 +6,20 @@
  * taxonomy-registry compliance, duplicate slugs, and broken internal links.
  * WARNINGs (e.g. unknown tag, missing cover) don't fail the build.
  */
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { glintSchemas, type GlintCollection } from "../../content/schema.js";
 import { listPosts, parseCategories, parseTags } from "../../lib/content.js";
 import { lineIsScaffolding } from "../../lib/scaffolding.js";
+
+// Template files that should be filled at onboarding, with markers that mean
+// "still a placeholder". A site with these unfilled isn't ready to publish.
+const TEMPLATE_FILES: Array<{ file: string; markers: RegExp[] }> = [
+  { file: "data/content-strategy.md", markers: [/<[^>\n]*\s[^>\n]*>/, /Replace with real pillars/i] },
+  { file: "docs/brand-voice.md", markers: [/<[^>\n]*\s[^>\n]*>/, /^>\s*TEMPLATE\b/im] },
+  { file: "data/categories.md", markers: [/Example Category/i, /\bexample-category\b/] },
+  { file: "data/tags.md", markers: [/\bexample-tag\b/] },
+];
 
 type Severity = "ERROR" | "WARN";
 interface Finding {
@@ -81,6 +92,16 @@ export async function runDoctor(args: string[]): Promise<void> {
       if (looksLikePost && !validPaths.has(target)) {
         add(p.file, "WARN", `internal link to "${m[1]}" doesn't resolve to a known post`);
       }
+    }
+  }
+
+  // 6. onboarding completeness: template files still carrying placeholders
+  for (const { file, markers } of TEMPLATE_FILES) {
+    const p = join(dir, file);
+    if (!existsSync(p)) continue;
+    const text = readFileSync(p, "utf8");
+    if (markers.some((re) => re.test(text))) {
+      add(file, "WARN", "still has template placeholders — fill it before publishing (run `glint onboard` or edit it)");
     }
   }
 

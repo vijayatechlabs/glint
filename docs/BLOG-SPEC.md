@@ -112,7 +112,8 @@ the site. (Self-hosted Umami on the Coolify VPS is the alternative.)
 
 - `glint status` — content board (✅ implemented).
 - `glint doctor` — schema + scaffolding + taxonomy-registry + dup-slug +
-  broken-internal-link validation; fails (exit 1) on any ERROR (✅ implemented).
+  broken-internal-link validation + onboarding-placeholder warnings (unfilled
+  strategy/voice/taxonomy); fails (exit 1) on any ERROR (✅ implemented).
 - `glint build` — Astro static build honoring §1 draft rules (✅ v1: HTML +
   `BlogPosting` JSON-LD + canonical/OG + sitemap + RSS + `llms.txt` + `/raw` twins
   + `/api/blog.json` + reading time). **v2:** category/tag archives, related posts,
