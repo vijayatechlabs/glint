@@ -7,6 +7,7 @@
  * from the agent toolkit (Phase 1) as well as the terminal.
  */
 const COMMANDS = {
+  onboard: "Detect brand/tokens/host from an app + draft the site — `--app <repo> --apply`",
   init: "Analyse a repo, detect its state (fresh/migration/adopt), print a plan",
   new: "Scaffold/complete a brand site's structure + agent files (idempotent)",
   status: "Content board — list every post by status (draft/scheduled/published)",
@@ -31,6 +32,11 @@ async function main(): Promise<void> {
   const [cmd, ...args] = process.argv.slice(2);
 
   switch (cmd) {
+    case "onboard": {
+      const { runOnboard } = await import("./commands/onboard.js");
+      await runOnboard(args);
+      break;
+    }
     case "init": {
       const { runInit } = await import("./commands/init.js");
       await runInit(args);
