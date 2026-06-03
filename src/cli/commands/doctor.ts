@@ -93,6 +93,24 @@ export async function runDoctor(args: string[]): Promise<void> {
         add(p.file, "WARN", `internal link to "${m[1]}" doesn't resolve to a known post`);
       }
     }
+
+    // 6. referenced local images exist; inline images have alt text. Root-absolute
+    // paths (/media/…) map to the site's public/ dir; external (http/s3/data) skipped.
+    const missingImage = (src: unknown): boolean =>
+      typeof src === "string" && src.startsWith("/") && !existsSync(join(dir, "public", src));
+    const cover = p.data.cover as { src?: string } | undefined;
+    if (cover?.src && missingImage(cover.src)) add(p.file, "WARN", `cover image not found: public${cover.src}`);
+    if (Array.isArray(p.data.images)) {
+      for (const im of p.data.images as Array<{ src?: string }>) {
+        if (im?.src && missingImage(im.src)) add(p.file, "WARN", `image not found: public${im.src}`);
+      }
+    }
+    for (const m of p.body.matchAll(/!\[([^\]]*)\]\(([^)\s]+)\)/g)) {
+      const alt = m[1]!.trim();
+      const src = m[2]!;
+      if (!alt) add(p.file, "WARN", `inline image missing alt text: ${src}`);
+      if (missingImage(src)) add(p.file, "WARN", `inline image not found: public${src}`);
+    }
   }
 
   // 6. onboarding completeness: template files still carrying placeholders
