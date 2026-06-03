@@ -1,42 +1,38 @@
 {
   "name": "@vijayatech/glint",
-  "version": "0.0.1",
-  "description": "The lightning publishing engine for the AI era — git-native, static-output, agent-first, AEO-native.",
+  "version": "0.1.0",
+  "description": "The lightning publishing engine for the AI era — git-native, static-output, agent-first, SEO/AEO-native.",
   "type": "module",
   "license": "UNLICENSED",
   "private": true,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "bin": {
-    "glint": "./src/cli/index.ts"
+    "glint": "./dist/cli/index.js"
   },
   "exports": {
-    ".": "./src/index.ts",
-    "./schema": "./src/content/schema.ts"
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./schema": { "types": "./dist/content/schema.d.ts", "import": "./dist/content/schema.js" }
   },
+  "files": ["dist", "src/scaffold"],
   "scripts": {
+    "build": "tsup",
+    "prepare": "tsup",
     "glint": "tsx src/cli/index.ts",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": [
-    "astro",
-    "static-site",
-    "publishing",
-    "aeo",
-    "agent",
-    "git-native"
-  ],
+  "keywords": ["astro", "static-site", "publishing", "aeo", "seo", "agent", "git-native"],
   "dependencies": {
     "turndown": "^7.2.4",
     "yaml": "^2.9.0",
     "zod": "^3.23.0"
   },
-  "peerDependencies": {
-    "astro": "^4.0.0 || ^5.0.0"
-  },
   "devDependencies": {
     "@types/node": "^22.0.0",
     "@types/turndown": "^5.0.6",
+    "tsup": "^8.3.0",
     "tsx": "^4.19.0",
     "typescript": "^5.6.0"
-  },
-  "comment": "Deps are declared but not yet installed — that's the next scaffold step. bin runs via tsx during dev; a dist build is added before npm publish."
+  }
 }

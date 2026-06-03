@@ -19,6 +19,22 @@ function writeIfMissing(path: string, content: string, created: string[], skippe
   created.push(path);
 }
 
+/** Locate the engine's scaffold theme, robustly across dev (running from src/)
+ *  and published builds (running from dist/, with src/scaffold shipped). */
+function scaffoldThemeDir(): string {
+  let d = fileURLToPath(new URL(".", import.meta.url));
+  for (let i = 0; i < 8; i++) {
+    const a = join(d, "src", "scaffold", "theme");
+    if (existsSync(a)) return a;
+    const b = join(d, "scaffold", "theme");
+    if (existsSync(b)) return b;
+    const parent = dirname(d);
+    if (parent === d) break;
+    d = parent;
+  }
+  throw new Error("Glint scaffold theme not found (expected src/scaffold/theme).");
+}
+
 /** Recursively copy the engine's Astro theme templates into the site, stripping
  *  the `.tmpl` suffix and never overwriting existing files. The `.tmpl` suffix
  *  keeps the templates out of the engine's own typecheck. */
@@ -277,8 +293,7 @@ export async function runNew(args: string[]): Promise<void> {
   w("astro.config.ts", astroConfig(`https://${domain}`));
   w("public/theme.css", themeCss(brand));
   w("public/custom.css", customCss(brand));
-  const themeRoot = fileURLToPath(new URL("../../scaffold/theme", import.meta.url));
-  copyTheme(themeRoot, dir, created, skipped);
+  copyTheme(scaffoldThemeDir(), dir, created, skipped);
 
   console.log(`\nglint new — ${brand} (${domain}), collections [${collections.join(", ")}], mount "${mount || "/"}", target ${target}\n`);
   console.log(`  created (${created.length}):`);

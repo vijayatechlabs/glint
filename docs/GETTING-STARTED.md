@@ -119,21 +119,23 @@ always runs the latest once you update your copy of the engine.
   Add a convenience script to the site's `package.json`:
   `"glint": "pnpm -C ../glint glint"` → then `pnpm glint init`, `pnpm glint build`, …
 
-- **Git dependency (cleaner).** In the site's `package.json`:
-  `"@vijayatech/glint": "github:vijayatechlabs/glint"`, then update with
-  `pnpm update @vijayatech/glint`. Pin to a tag for stability:
-  `github:vijayatechlabs/glint#v0.2.0` — a project only moves when you choose.
+- **Git dependency (now works — the engine builds on install).** In the site's
+  `package.json`: `"@vijayatech/glint": "github:vijayatechlabs/glint"`, then
+  `pnpm install` / `pnpm update @vijayatech/glint`. The engine's `prepare` step
+  builds `dist/` on install, so the `glint` bin and the importable schema
+  (`import { blog } from "@vijayatech/glint/schema"`) are available. Pin to a tag
+  for stability: `github:vijayatechlabs/glint#v0.1.0`.
 
-**Scaffolded site files** (Astro theme, `docs/brand-voice.md`, `data/categories.md`/
-`data/tags.md`) were *copied* into the repo by `glint new`, so they are **yours and
-don't auto-update**. Re-running `glint new` is idempotent — it adds new gaps but
-never overwrites. Pull a theme/layout improvement in deliberately (copy the changed
-file from the engine's `examples/playground/`).
+**Scaffolded site files** (Astro theme, `docs/brand-voice.md`, taxonomy registries)
+were *copied* into the repo by `glint new`, so they are **yours and don't
+auto-update**. Re-running `glint new` is idempotent — it adds new gaps but never
+overwrites. Pull a theme improvement in deliberately.
 
-**The frictionless future (v2):** once the engine is published with a build step, a
-site imports the schema/components/theme *from the package*, so
-`pnpm update @vijayatech/glint` pulls **everything** — logic and theme — at once.
-That publish step is the highest-leverage upgrade for "pull updates".
+**One-step updates:** with the git dependency, `pnpm update @vijayatech/glint`
+refreshes the engine logic (CLI + importable schema) in one command. Theme/layout
+files remain copies you adopt deliberately (so brand tweaks survive). When the
+engine is published to a registry, `pnpm add @vijayatech/glint` is the same flow
+without the git URL.
 
 ## 6. Where to go deeper
 

@@ -31,17 +31,25 @@ layout and matches your brand via **tokens** — not custom themes.
 
 ## Status
 
-**Engine working end-to-end.** CLI: `init` · `new` · `status` · `doctor` ·
-`import wordpress` · **`build`** · **`preview`**. The Astro rendering layer (v1)
-produces a static site with the AEO surface — JSON-LD, sitemap, RSS, `llms.txt`,
-`/raw` markdown twins, JSON API — with drafts excluded from production. See
-`examples/playground/` for a buildable reference site.
+**Engine complete end-to-end.** CLI: `onboard · init · new · status · doctor ·
+import · build · preview · feedback · theme`.
 
-**v2 (next):** category/tag archives, related posts, Pagefind search, auto OG
-images, internal-link registry, then publishing the schema for cross-package reuse.
+- **Onboard any brand in one command** — `glint onboard --app <repo> --apply`
+  detects brand/tokens/host and scaffolds a buildable, brand-matched blog.
+- **Static + AEO** — JSON-LD, sitemap, RSS, `robots.txt`, `llms.txt`, `/raw`
+  markdown twins, JSON API; category/tag **archives**, **related posts**, and
+  **Pagefind search**; drafts excluded from production.
+- **Brand blend** — token-styled static header/footer; `glint theme pull` pulls an
+  app's Tailwind/CSS tokens into `theme.css`; `custom.css` escape hatch.
+- **Packaged** — builds with tsup to `dist/`; importable
+  (`import { blog } from "@vijayatech/glint/schema"`) and installable as a git
+  dependency (builds on install via `prepare`).
+
+See `examples/playground/` for a buildable reference site, `docs/FEEDBACK.md` for
+the read-only-engine feedback loop.
 
 Layout: this repo is the engine package (`@vijayatech/glint`). Each brand site is
-a separate repo that installs the engine.
+a separate repo, onboarded from the engine.
 
 ## Confirmed stack (2026-06-02)
 
