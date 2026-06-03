@@ -10,6 +10,44 @@ Flow, mirroring OpenStart: **discover → understand → voice → unfold → st
 
 ---
 
+## Onboarding model: capture once → compile forever
+
+All per-brand variability is captured **once** at onboarding into a declarative
+**Brand Manifest** (`site.config.ts` + `theme.css` + `data/*`). Afterward the
+engine is uniform and every build is deterministic and static — no per-build cost,
+tokens, or drift.
+
+Most things are **not** per-brand — page layouts, search, sitemap, `llms.txt`,
+JSON-LD are engine-invariant. The captured surface is deliberately small:
+
+```
+identity    name · domain · logo · tagline
+tokens      colors · fonts · radius · dark/light        → theme.css
+chrome      nav[] · footer[] · social[]                 → Glint header/footer
+mount       standalone | /blog-on-app · deployTarget · host
+collections [blog, …]
+gating      none (default)   ← auth is opt-in, rarely used; blogs are public
+indexing    sitemap/robots/llms on · IndexNow key (auto)
+```
+
+### Detector-driven capture (low input, low tokens, low error)
+Onboarding runs **deterministic detectors**, then asks the human to confirm only
+low-confidence gaps:
+- `glint theme pull` — tokens from the app's `tailwind.config`/CSS (repo) or the live site (URL)
+- chrome/nav from the live `<header>`/`<footer>`
+- host/mount/auth from `package.json` / `netlify.toml` / `vercel.json` / deps
+
+These are scripts, not LLM reading → cheap and repeatable. Target: **<30 min,
+<10 human inputs** per brand; everything static and simple afterward.
+
+### `glint onboard` — detect → confirm → unfold → verify
+1. **DETECT** — detectors against the app repo/domain → draft manifest
+2. **CONFIRM** — one short pass; human fixes only what detectors got wrong
+3. **UNFOLD** — `glint new` generates the site from the manifest
+4. **VERIFY** — `glint doctor` + preview build
+
+---
+
 ## States Glint detects
 
 `glint init` inspects the target dir and classifies it into one mode:

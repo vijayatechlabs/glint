@@ -10,6 +10,24 @@ Decisions consolidated here were made 2026-06-02.
 
 ---
 
+## UI & brand blend (positioning)
+
+Glint ships **one** opinionated, reading-optimized layout and blends with each
+brand via **tokens, not per-site theming** (the Superblog model). The blog must
+feel like part of the app — never a separate product.
+
+- **Tokens** (`public/theme.css`): colors, fonts, radius — extracted from the app
+  at onboarding so the blog inherits the brand's palette + type.
+- **Chrome**: a simple, **static** header (logo + nav) and footer, rendered by
+  Glint and styled by tokens; links come from `site.config.ts`. No app runtime,
+  no auth state.
+- **Escape hatch**: `public/custom.css` for brand-specific overrides.
+- **Auth/gating**: OFF by default; opt-in edge check only for the rare gated brand.
+- **Non-goals**: page builders, multiple themes, heavy layout customization,
+  publishing-house workflows. Glint is for small teams — speed, simplicity, SEO/AEO.
+
+---
+
 ## 1. Content states (status model)
 
 **Git-native, not folders.** All posts of a collection live in one flat folder

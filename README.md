@@ -13,7 +13,21 @@ repo; **humans approve by reviewing a PR**; output is **pure static HTML + a
 JSON/MD content API**. WordPress-grade media and reuse, none of the runtime.
 
 It is deliberately **not a CMS**. It is a thin content contract + agent
-publishing loop + static build, assembled on Astro + a self-hosted VPS.
+publishing loop + static build, assembled on Astro and deployable to any host.
+
+## Who Glint is for (and not)
+
+**For:** small teams and solo founders who want fast, SEO/AEO-strong blogs that
+**blend into their existing brand/app**, published by AI agents with light human
+review. Speed, simplicity, agent-first.
+
+**Not for:** heavy per-site customization, page builders, theme marketplaces, or
+publishing-house workflows. Glint ships **one** opinionated, reading-optimized
+layout and matches your brand via **tokens** — not custom themes.
+
+> Design rule: the blog must feel like part of your app — same colors, type, and a
+> simple matching header/footer — **never a separate product** — while staying
+> fully static for SEO/AEO.
 
 ## Status
 
