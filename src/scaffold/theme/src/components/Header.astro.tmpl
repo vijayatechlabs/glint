@@ -1,0 +1,17 @@
+---
+// Static, token-styled site header. Links come from data/site.config.ts.
+import { site } from "../../data/site.config";
+const nav = (site as { nav?: { label: string; href: string }[] }).nav ?? [];
+const logo = (site as { logo?: string }).logo;
+---
+
+<header class="site-header">
+  <a class="brand" href="/">
+    {logo ? <img src={logo} alt={site.brand} height="28" /> : site.brand}
+  </a>
+  {nav.length > 0 && (
+    <nav>
+      {nav.map((l) => <a href={l.href}>{l.label}</a>)}
+    </nav>
+  )}
+</header>

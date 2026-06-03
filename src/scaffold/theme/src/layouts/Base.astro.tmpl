@@ -1,5 +1,8 @@
 ---
 import { site } from "../../data/site.config";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import "../styles/base.css";
 
 interface Props {
   title: string;
@@ -34,12 +37,14 @@ const ogImage = image ? new URL(image, Astro.site).href : undefined;
 
     <link rel="alternate" type="application/rss+xml" title="RSS" href={new URL("/rss.xml", Astro.site).href} />
 
-    <!-- Brand design tokens. Mirror your main app's palette/typography in
-         public/theme.css so the blog matches the app. -->
+    <!-- Brand tokens (regenerate with `glint theme pull`) then per-brand overrides. -->
     <link rel="stylesheet" href="/theme.css" />
+    <link rel="stylesheet" href="/custom.css" />
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
   </head>
   <body>
+    <Header />
     <main><slot /></main>
+    <Footer />
   </body>
 </html>

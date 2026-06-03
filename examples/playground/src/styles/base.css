@@ -1,0 +1,44 @@
+/* Glint base layout — STRUCTURAL only. All brand look comes from the tokens in
+   public/theme.css; brand-specific overrides go in public/custom.css. Engine-owned
+   (updated via the engine), so `glint theme pull` only ever rewrites tokens. */
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg, #fff);
+  color: var(--fg, #1a1a1a);
+  font-family: var(--font-sans, system-ui, sans-serif);
+  line-height: 1.65;
+}
+a { color: var(--brand, #2563eb); text-decoration: none; }
+a:hover { color: var(--brand-hover, #1d4ed8); text-decoration: underline; }
+img { max-width: 100%; height: auto; }
+
+.site-header, main, .site-footer {
+  max-width: var(--maxw, 720px);
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+.site-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-block: 1rem; border-bottom: 1px solid var(--border, #e5e7eb);
+}
+.site-header .brand { font-weight: 700; color: var(--fg, #1a1a1a); }
+.site-header nav a { margin-left: 1.1rem; color: var(--muted, #6b7280); }
+.site-header nav a:hover { color: var(--fg, #1a1a1a); }
+
+main { padding-block: 2rem; }
+
+.site-footer {
+  margin-top: 3rem; padding-block: 1.25rem; font-size: .9rem;
+  border-top: 1px solid var(--border, #e5e7eb); color: var(--muted, #6b7280);
+  display: flex; flex-direction: column; gap: .5rem;
+}
+.site-footer nav a { margin-right: 1rem; color: var(--muted, #6b7280); }
+
+article :is(h1, h2, h3) { line-height: 1.25; }
+article h1 { font-size: 2rem; margin-bottom: .25rem; }
+article img { border-radius: var(--radius, 8px); }
+article pre { background: #0b0e14; color: #e2e8f0; padding: 1rem; border-radius: var(--radius, 8px); overflow-x: auto; }
+
+.post-list { list-style: none; padding: 0; display: grid; gap: 1.5rem; }
+.post-list .summary { color: var(--muted, #6b7280); margin: .25rem 0 0; }

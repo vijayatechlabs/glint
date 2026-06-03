@@ -64,21 +64,26 @@ export default defineConfig({
 });
 `;
 
+// theme.css holds ONLY brand tokens (regenerate with `glint theme pull`).
+// Structural CSS lives in the theme's src/styles/base.css (engine-owned).
 const themeCss = (brand: string) =>
-  `/* ${brand} — brand design tokens.
-   Mirror your main app's palette + typography here so the blog matches the app.
-   The Glint theme consumes these CSS custom properties. */
+  `/* ${brand} — brand design tokens. Mirror your app's palette + type so the blog
+   blends in. Regenerate from the app with: glint theme pull --tailwind <path>. */
 :root {
   --bg: #ffffff;
   --fg: #1a1a1a;
-  --link: #2563eb;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --brand: #2563eb;
+  --brand-hover: #1d4ed8;
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --maxw: 720px;
+  --radius: 8px;
 }
-body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-sans); line-height: 1.6; }
-main { max-width: var(--maxw); margin: 0 auto; padding: 2rem 1.25rem; }
-a { color: var(--link); }
-article :is(h1, h2, h3) { line-height: 1.25; }
+`;
+
+const customCss = (brand: string) =>
+  `/* ${brand} — brand-specific overrides. Glint won't touch this file. */
 `;
 
 const siteConfig = (brand: string, domain: string, baseUrl: string, collections: string[], mount: string, target: string) =>
@@ -90,6 +95,10 @@ export const site = {
   mount: ${JSON.stringify(mount || "/")},          // "/blog" to mount onto an app, "/" for standalone
   deployTarget: ${JSON.stringify(target)},          // cf-pages | coolify | netlify | vercel
   collections: ${JSON.stringify(collections)},
+  logo: "",                          // e.g. "/media/logo.svg"; "" shows the brand name
+  nav: [{ label: "Home", href: ${JSON.stringify(`https://${domain}`)} }],
+  footer: [],                        // [{ label, href }] — privacy, contact, etc.
+  social: {},                        // { twitter, github, linkedin }
   seo: {
     titleTemplate: "%s — ${brand}",
     defaultDescription: "",
@@ -260,6 +269,7 @@ export async function runNew(args: string[]): Promise<void> {
   w("package.json", packageJson(slug));
   w("astro.config.ts", astroConfig(`https://${domain}`));
   w("public/theme.css", themeCss(brand));
+  w("public/custom.css", customCss(brand));
   const themeRoot = fileURLToPath(new URL("../../scaffold/theme", import.meta.url));
   copyTheme(themeRoot, dir, created, skipped);
 

@@ -11,6 +11,7 @@ const COMMANDS = {
   new: "Scaffold/complete a brand site's structure + agent files (idempotent)",
   status: "Content board — list every post by status (draft/scheduled/published)",
   feedback: "Record structured feedback for the engine (projects never edit Glint)",
+  theme: "Pull brand tokens into theme.css — `glint theme pull --tailwind <path>`",
   build: "Build static HTML + JSON/MD content API + AEO surface",
   preview: "Preview the built site locally",
   doctor: "Validate schema, alt text, and internal links (the pre-merge gate)",
@@ -48,6 +49,11 @@ async function main(): Promise<void> {
     case "feedback": {
       const { runFeedback } = await import("./commands/feedback.js");
       await runFeedback(args);
+      break;
+    }
+    case "theme": {
+      const { runTheme } = await import("./commands/theme.js");
+      await runTheme(args);
       break;
     }
     case "import": {
