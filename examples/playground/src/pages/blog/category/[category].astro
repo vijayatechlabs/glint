@@ -1,0 +1,37 @@
+---
+import Base from "../../../layouts/Base.astro";
+import { publicPosts } from "../../../posts";
+import { categories, termOf } from "../../../taxonomy";
+
+export async function getStaticPaths() {
+  const posts = await publicPosts();
+  const cats = categories();
+  const groups = new Map<string, typeof posts>();
+  for (const p of posts) {
+    const c = p.data.category;
+    if (!c) continue;
+    if (!groups.has(c)) groups.set(c, []);
+    groups.get(c)!.push(p);
+  }
+  return [...groups].map(([slug, items]) => ({
+    params: { category: slug },
+    props: { term: termOf(cats, slug), posts: items },
+  }));
+}
+
+const { term, posts } = Astro.props;
+---
+
+<Base title={`${term.name} — articles`} description={term.description || `Articles in ${term.name}`}>
+  <h1>{term.name}</h1>
+  {term.description && <p>{term.description}</p>}
+  <ul class="post-list">
+    {posts.map((p) => (
+      <li>
+        <a href={`/blog/${p.id}/`}>{p.data.title}</a>
+        <p class="summary">{p.data.summary}</p>
+      </li>
+    ))}
+  </ul>
+  <p><a href="/">← All posts</a></p>
+</Base>

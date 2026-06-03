@@ -29,9 +29,10 @@ function ensureAstroSite(dir: string): boolean {
   return ok;
 }
 
-function runAstro(dir: string, sub: "build" | "dev" | "preview"): void {
-  // Prefer the locally-installed astro; fall back to npx.
-  const r = spawnSync("npx", ["astro", sub], { cwd: dir, stdio: "inherit" });
+function runScript(dir: string, script: "build" | "dev"): void {
+  // Run the site's package script so the full pipeline runs (astro build +
+  // pagefind for `build`). `npm run` puts node_modules/.bin on PATH.
+  const r = spawnSync("npm", ["run", script], { cwd: dir, stdio: "inherit" });
   process.exitCode = r.status ?? 1;
 }
 
@@ -41,8 +42,8 @@ export async function runBuild(args: string[]): Promise<void> {
     process.exitCode = 1;
     return;
   }
-  console.log(`glint build → astro build in ${dir}\n`);
-  runAstro(dir, "build");
+  console.log(`glint build → astro build + pagefind in ${dir}\n`);
+  runScript(dir, "build");
 }
 
 export async function runPreview(args: string[]): Promise<void> {
@@ -52,5 +53,5 @@ export async function runPreview(args: string[]): Promise<void> {
     return;
   }
   console.log(`glint preview → astro dev (drafts visible) in ${dir}\n`);
-  runAstro(dir, "dev");
+  runScript(dir, "dev");
 }

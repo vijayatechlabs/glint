@@ -1,7 +1,7 @@
 ---
 import { render } from "astro:content";
 import Base from "../../layouts/Base.astro";
-import { pagePosts } from "../../posts";
+import { pagePosts, publicPosts, relatedTo } from "../../posts";
 
 export async function getStaticPaths() {
   const posts = await pagePosts();
@@ -14,6 +14,7 @@ const url = new URL(`/blog/${post.id}/`, Astro.site).href;
 
 const words = post.body?.trim().split(/\s+/).length ?? 0;
 const readingTime = Math.max(1, Math.round(words / 200));
+const related = relatedTo(post, await publicPosts());
 
 const blogPosting = {
   "@context": "https://schema.org",
@@ -25,7 +26,6 @@ const blogPosting = {
   mainEntityOfPage: url,
   ...(post.data.cover ? { image: new URL(post.data.cover.src, Astro.site).href } : {}),
 };
-
 const breadcrumb = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -45,15 +45,33 @@ const breadcrumb = {
   jsonLd={[blogPosting, breadcrumb]}
 >
   {post.data.draft && <p><strong>⚠ DRAFT — not published (preview only)</strong></p>}
-  <article>
+  <article data-pagefind-body>
     <h1>{post.data.title}</h1>
-    <p>
+    <p class="meta">
       <time datetime={post.data.publishedAt.toISOString()}>
         {post.data.publishedAt.toISOString().slice(0, 10)}
       </time>
       · {readingTime} min read
+      {post.data.category && <> · <a href={`/blog/category/${post.data.category}/`}>{post.data.category}</a></>}
     </p>
     <Content />
+    {post.data.tags.length > 0 && (
+      <p class="tags">
+        {post.data.tags.map((t) => <a href={`/blog/tag/${t}/`}>#{t}</a>)}
+      </p>
+    )}
   </article>
+
+  {related.length > 0 && (
+    <aside class="related">
+      <h2>Related</h2>
+      <ul class="post-list">
+        {related.map((p) => (
+          <li><a href={`/blog/${p.id}/`}>{p.data.title}</a></li>
+        ))}
+      </ul>
+    </aside>
+  )}
+
   <p><a href="/">← All posts</a></p>
 </Base>

@@ -9,9 +9,8 @@ const logo = (site as { logo?: string }).logo;
   <a class="brand" href="/">
     {logo ? <img src={logo} alt={site.brand} height="28" /> : site.brand}
   </a>
-  {nav.length > 0 && (
-    <nav>
-      {nav.map((l) => <a href={l.href}>{l.label}</a>)}
-    </nav>
-  )}
+  <nav>
+    {nav.map((l) => <a href={l.href}>{l.label}</a>)}
+    <a href="/blog/search/">Search</a>
+  </nav>
 </header>

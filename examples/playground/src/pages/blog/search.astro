@@ -1,0 +1,18 @@
+---
+import Base from "../../layouts/Base.astro";
+// Static, in-browser search via Pagefind. The /pagefind/* bundle is generated
+// after `astro build` by the `pagefind --site dist` step (see package.json build).
+---
+
+<Base title="Search" description="Search the blog" noindex={true}>
+  <h1>Search</h1>
+  <link rel="stylesheet" href="/pagefind/pagefind-ui.css" />
+  <div id="search"></div>
+  <script src="/pagefind/pagefind-ui.js" is:inline></script>
+  <script is:inline>
+    window.addEventListener("DOMContentLoaded", () => {
+      // PagefindUI is provided by the bundle injected at build time.
+      new PagefindUI({ element: "#search", showSubResults: true, showImages: false });
+    });
+  </script>
+</Base>

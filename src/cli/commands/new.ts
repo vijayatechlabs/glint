@@ -43,11 +43,18 @@ const packageJson = (slug: string) =>
       name: slug,
       type: "module",
       private: true,
-      scripts: { dev: "astro dev", build: "astro build", preview: "astro preview" },
+      scripts: {
+        dev: "astro dev",
+        build: "astro build && pagefind --site dist",
+        preview: "astro preview",
+      },
       dependencies: {
         astro: "^6.0.0",
         "@astrojs/rss": "^4.0.11",
         "@astrojs/sitemap": "^3.3.0",
+      },
+      devDependencies: {
+        pagefind: "^1.1.0",
       },
     },
     null,
