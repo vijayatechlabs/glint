@@ -69,7 +69,8 @@ const packageJson = (slug: string) =>
       },
       dependencies: {
         // Engine: schema, CLI, validators — single source of truth for the contract.
-        "@vijayatech/glint": "git+https://github.com/vijayatechlabs/glint.git",
+        // npm registry dep (not git) so Vite resolves it cleanly and `pnpm update` works.
+        "@vijayatech/glint": "^0.1.0",
         astro: "^6.0.0",
         "@astrojs/rss": "^4.0.11",
         "@astrojs/sitemap": "^3.3.0",
