@@ -432,25 +432,10 @@ future WordPress client migration reuses it.
 
 ---
 
-## 12. Decisions — resolved (2026-06-02)
+## 12. Decisions
 
-1. ✅ **Name** — Glint
-2. ✅ **Framework** — Astro
-3. ✅ **Host** — Hostinger VPS + Coolify
-4. ✅ **Pilot** — naam.one (migrate off WordPress)
-5. ✅ **Client dashboard tier** — deferred to Phase 4
+Architectural and product decisions have moved to their own append-only log:
+[`docs/DECISIONS.md`](DECISIONS.md).
 
-### Sub-decisions introduced by the VPS/Coolify choice (recommended defaults)
-
-| Question | Recommended default | Note |
-|---|---|---|
-| Cloudflare free CDN in front of the VPS? | **Yes** | Global cache + TLS + DDoS, free, origin stays the VPS. Drop for pure single-region VPS. |
-| Heavy-media storage | **MinIO on the VPS** | Self-hosted, S3 API → swap to Bunny/R2 later with no content change. |
-| Build & deploy | **Coolify git-deploy + GH Actions for `glint doctor`** | Merge to `main` → Coolify builds & deploys; PR check is the human gate. |
-| Dynamic layer runtime | **Astro Node adapter container** | One small service for gating/forms/IndexNow; everything else static. |
-
----
-
-*Next step: scaffold `@vijayatech/glint` and run the naam.one WP migration (Phase 0).
-Run `/init-project` to bring this StaticBlog workspace under the VijayaTech framework
-when we start building.*
+That file records every dated decision with the rationale and alternatives
+considered — the "why" this document doesn't need to repeat.

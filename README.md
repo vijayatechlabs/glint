@@ -31,7 +31,7 @@ layout and matches your brand via **tokens** — not custom themes.
 
 ## Status
 
-**v1: Blog engine — complete end-to-end.** CLI: `onboard · init · new · status · doctor ·
+**v1: Blog engine — complete end-to-end.** CLI: `onboard · init · new · sync · status · doctor ·
 import · build · preview · feedback · theme`.
 
 - **Onboard any brand in one command** — `glint onboard --app <repo> --apply`
@@ -75,18 +75,19 @@ a separate repo, onboarded from the engine.
 
 - [`docs/GETTING-STARTED.md`](docs/GETTING-STARTED.md) — **start here** — how to begin in Claude / Gemini-Antigravity / Codex, for any project state.
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — layers, contract, roadmap, decisions.
+- [`docs/DECISIONS.md`](docs/DECISIONS.md) — append-only ADR log (why, not what).
 - [`docs/AGENT-GUIDE.md`](docs/AGENT-GUIDE.md) — the agent-agnostic operating contract.
 - [`docs/INIT.md`](docs/INIT.md) — the state-aware init system (fresh/migration/adopt/established).
 - [`docs/BLOG-SPEC.md`](docs/BLOG-SPEC.md) — the SEO/AEO content spec + definition of done.
 - [`docs/concept.md`](docs/concept.md) — original brainstorm that seeded the design.
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — changelog discipline + maintenance rules.
 
 ## Roadmap
 
-- **Phase 0** — engine skeleton + migrate **naam.one** off WordPress, deploy on Coolify.
-- **Phase 1** — agent publishing loop (draft → file → PR → deploy).
-- **Phase 2** — content API + gated tier + `/blog` mount onto apps.
-- **Phase 3** — MinIO media + multi-brand cloning + AEO polish.
-- **Phase 4** — optional non-technical client dashboard tier.
+Phase 0 (engine + naam.one migration) → Phase 1 (agent loop) → Phase 2 (content
+API + multi-collection) → Phase 3 (multi-brand scale) → Phase 4 (client dashboard).
+
+Full roadmap with exit criteria: [`docs/ARCHITECTURE.md §11`](docs/ARCHITECTURE.md).
 
 ---
 

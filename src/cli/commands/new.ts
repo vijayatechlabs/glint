@@ -21,7 +21,7 @@ function writeIfMissing(path: string, content: string, created: string[], skippe
 
 /** Locate the engine's scaffold theme, robustly across dev (running from src/)
  *  and published builds (running from dist/, with src/scaffold shipped). */
-function scaffoldDir(sub: string): string {
+export function scaffoldDir(sub: string): string {
   let d = fileURLToPath(new URL(".", import.meta.url));
   for (let i = 0; i < 8; i++) {
     const a = join(d, "src", "scaffold", sub);
@@ -60,6 +60,9 @@ const packageJson = (slug: string) =>
       type: "module",
       private: true,
       scripts: {
+        // Expose the engine CLI as `pnpm glint <cmd>` so it works from the repo
+        // root without a global install (the bin lives in node_modules/.bin).
+        glint: "glint",
         dev: "astro dev",
         build: "astro build && pagefind --site dist",
         preview: "astro preview",
@@ -132,7 +135,7 @@ export const site = {
 } as const;
 `;
 
-const agentsMd = (brand: string, domain: string, collections: string[], mount: string) =>
+export const agentsMd = (brand: string, domain: string, collections: string[], mount: string) =>
   `# AGENTS.md — ${brand} (a Glint site)
 
 Standing instructions for any agent in this repo (Antigravity, Claude Code, Codex,
@@ -158,6 +161,11 @@ it builds to static HTML at **${domain}${mount || ""}**. Not WordPress, not a CM
 - **No leaked scaffolding** (\`Meta Description:\`, \`SEO Slug:\`, \`Alt Text:\`) in bodies.
 - **Don't break URLs:** keep slugs stable or add a \`redirects.json\` entry.
 - **Every image needs real \`alt\` text.**
+- **Stagger publish dates:** never stamp a batch with one timestamp — sequence
+  \`publishedAt\` per the cadence in \`data/content-strategy.md\`.
+- **No duplicate posts:** scan \`content/\` + \`data/content-plan.md\`; sharpen the angle
+  instead of repeating an existing post.
+- **Review gate:** self-check against \`docs/blog-review-checklist.md\` before the PR.
 
 ## Frontmatter contract (\`content/<collection>/<slug>.md\`)
 \`\`\`yaml
@@ -182,8 +190,10 @@ cover: { src: /media/<slug>.png, alt: "describes the image + relevance" }
 4. **Draft** the chosen title per \`docs/content-playbook.md\` (answer-first, question
    headings, a table/steps where it fits, an FAQ, sources). Enforce the brand voice +
    frontmatter contract; set \`category\`/\`tags\` from the registries. Keep \`draft: true\`.
-5. **Branch \`content/<slug>\`, run \`glint doctor\`, open a PR.**
-6. A human reviews voice + accuracy, merges, flips \`draft: false\`.
+5. **Self-review** against \`docs/blog-review-checklist.md\` (every **[human]** item)
+   before opening the PR — don't hand a reviewer work you can clear yourself.
+6. **Branch \`content/<slug>\`, run \`pnpm glint doctor\`, open a PR.**
+7. A human reviews against \`docs/blog-review-checklist.md\`, merges, flips \`draft: false\`.
 
 Scheduled batches: an agent runner (cron / scheduled task) fires "draft the next N
 approved items from \`data/content-plan.md\`" — same flow, no engine code.
@@ -193,10 +203,39 @@ approved items from \`data/content-plan.md\`" — same flow, no engine code.
 - 🔒 **Don't modify the Glint engine** (\`@vijayatech/glint\` or any nested \`glint/\`
   clone). It's shared and read-only here.
 
+## Running the engine CLI
+The engine is the \`@vijayatech/glint\` dependency, not a folder in this repo. Run it
+as a package script from the repo root — **no global install**:
+\`\`\`
+pnpm glint <command>      # sync · doctor · status · build · preview · feedback
+\`\`\`
+(Equivalently \`npx glint <command>\`.) Bare \`glint\` won't work — the binary lives in
+\`node_modules/.bin\`, not on your PATH.
+
+## Updating Glint
+The engine and this site update **separately**:
+1. \`pnpm update @vijayatech/glint\` — pull the latest engine (schema, CLI, build
+   logic). Schema/validator changes apply immediately.
+2. \`pnpm glint sync --dry-run\` — preview which **engine-managed** files would change
+   (this is also the live answer to "which files are mine vs the engine's").
+3. \`pnpm glint sync\` — apply. It overwrites engine-reference docs and regenerates
+   engine-generated files (this AGENTS.md, the review checklist, agent rules) from
+   your \`data/site.config.ts\`. It **never touches** brand-owned files: your
+   \`brand-voice.md\`, \`categories.md\`, \`content-strategy.md\`, theme tokens, or content.
+
+## Leaving Glint (no lock-in)
+Your content is portable Markdown — there's no database or runtime to escape:
+- **Take your content:** copy \`content/\` (posts) and \`public/media/\` (images). Done.
+- **Drop the engine, keep the site:** remove \`@vijayatech/glint\` from \`package.json\`;
+  the Astro theme in \`src/\` was copied in at scaffold time and still \`astro build\`s
+  (you lose \`doctor\`/\`sync\`/\`status\`, not the site).
+- **Delete everything:** \`rm -rf\` this repo. Nothing lingers — no DB, no daemon, no
+  cloud state. What you deployed was static HTML.
+
 ## Found a gap or bug in Glint?
 **File feedback — don't patch the engine.** Run:
 \`\`\`
-glint feedback "what's missing or broken" --type enhancement --area build
+pnpm glint feedback "what's missing or broken" --type enhancement --area build
 \`\`\`
 It logs to \`glint-feedback.md\` and prints a GitHub issue for the engine repo.
 The maintainer changes Glint; you pull the update.
@@ -204,12 +243,12 @@ The maintainer changes Glint; you pull the update.
 Engine reference: \`@vijayatech/glint\` → \`docs/AGENT-GUIDE.md\`, \`docs/INIT.md\`, \`docs/FEEDBACK.md\`.
 `;
 
-const pointer = (brand: string) =>
+export const pointer = (brand: string) =>
   `# Follow \`AGENTS.md\` in this repo as your standing instructions, and read
 \`docs/brand-voice.md\` before writing content. This is the Glint site for ${brand}.
 `;
 
-const workspaceRule = (brand: string) =>
+export const workspaceRule = (brand: string) =>
   `# Glint workspace rule (always-active)
 
 This is the ${brand} site on the Glint engine. For every task:
@@ -324,6 +363,119 @@ Format: \`- [status] Pillar · Type · Title — note\`
 ## Published
 `;
 
+export const reviewChecklistTemplate = (brand: string) =>
+  `# Blog Review Checklist — ${brand}
+
+The pre-publish gate. A human (or agent) reviews **every** post against this before
+it merges and goes live. It is **brand-aware**: most checks point at the docs
+onboarding prepared for ${brand}, so reviewing a post means confirming it matches
+*this brand's* voice, keywords, taxonomy, and goals — not a generic standard.
+
+Pairs with:
+- \`docs/brand-voice.md\` — the voice every post is enforced against.
+- \`data/content-strategy.md\` — pillars, target keywords/topics, ICP, goals, cadence.
+- \`data/categories.md\` / \`data/tags.md\` — the controlled taxonomy.
+- \`data/links.json\` — canonical/shared URLs + CTAs to link to.
+- \`docs/content-playbook.md\` — blog types + AEO structure (how to write).
+
+**[doctor]** items are machine-checked by \`glint doctor\` (CI fails on them) — just
+confirm the run is green. **[human]** items need judgment no validator can make —
+spend your attention there.
+
+> A post is ready only when \`glint doctor\` is green **and** every [human] box is
+> honestly ticked. Drafts (\`draft: true\`) 404 in production until then.
+
+---
+
+## 1. Brand fit — does this belong to ${brand}?
+- [ ] **[human] On-strategy.** Maps to a pillar in \`data/content-strategy.md\` and
+      serves ${brand}'s goal/ICP — not a random topic.
+- [ ] **[human] Target keyword/topic.** Targets a primary keyword or question from the
+      strategy, and that term reads naturally in the title, the summary, and at least
+      one \`##\` heading. No keyword stuffing, no off-topic terms.
+- [ ] **[human] On-voice.** Tone, person, and vocabulary match \`docs/brand-voice.md\`.
+- [ ] **[human] Clear CTA.** Ends with a concrete next step that advances ${brand}'s
+      goal (try the product, book a call, read the pillar), linked via
+      \`data/links.json\` — never a dead end.
+
+## 2. Frontmatter contract
+- [ ] **[doctor]** Schema valid — \`title\`, \`summary\`, \`publishedAt\` present and typed.
+- [ ] **[human] Title** delivers what the body covers — specific, benefit-led, no
+      clickbait, no title/body mismatch.
+- [ ] **[human] Summary** is a 1–2 sentence value hook; it doubles as the meta
+      description, so it must read like one.
+- [ ] **[doctor] Category** — one kebab-case slug from \`data/categories.md\`.
+- [ ] **[doctor] Tags** — from \`data/tags.md\` (reuse before inventing; ~3–5).
+- [ ] **[human] Author** resolves to \`data/team.json\` (E-E-A-T: name a real author).
+- [ ] **[doctor] Cover** \`alt\` present + descriptive. **[human]** \`cover.src\` points
+      at a real asset and the \`alt\` truly describes it.
+- [ ] **[human] SEO overrides** (\`seo.title\`/\`seo.description\`) set only when they
+      should differ from \`title\`/\`summary\`.
+- [ ] **[doctor]** No leaked scaffolding or unfilled placeholders in the body.
+
+## 3. AEO formatting — so answer engines can quote it
+- [ ] **[human] Answer-first.** Opens with a bold \`**TL;DR —**\` (or equally direct
+      first 2–3 sentences) stating the conclusion.
+- [ ] **[human] Question-based headings** matching what readers actually ask.
+- [ ] **[human] Self-contained sections** — each answers one thing fully; no "as
+      mentioned above."
+- [ ] **[human] Extractable data** — at least one table, ordered step list, or
+      comparison matrix.
+- [ ] **[human] Logical heading hierarchy** — no skipped levels.
+- [ ] **[human] FAQ** near the end: 2–3 specific long-tail questions answered directly.
+- [ ] **[human] Freshness** — time-sensitive claims carry a date / "as of {year}"; no
+      decaying fact stated as permanent.
+
+## 4. SEO fundamentals
+- [ ] **[human] Internal linking.** Links to >=2 related ${brand} posts and the
+      relevant product/landing page; descriptive anchor text, not "click here". Use
+      \`data/links.json\` for shared URLs so one change updates every post.
+- [ ] **[doctor] Links resolve.** Broken internal links are errors; a published post
+      linking to a draft is flagged.
+- [ ] **[human] No duplicate / cannibalizing post.** Not a near-duplicate of existing
+      content — scan \`content/\` and \`data/content-plan.md\`. If it overlaps an existing
+      post, merge or sharpen the angle/keyword. (\`doctor\` catches duplicate *slugs*;
+      overlapping *topics* are your call.)
+- [ ] **[human] No URL break on rename.** A changed slug has a \`redirects.json\` entry.
+- [ ] **[human] Publish scheduling.** Shipping a batch? \`publishedAt\` is **staggered**
+      (sequential dates per the cadence in \`data/content-strategy.md\`) — don't stamp
+      10 posts with the same timestamp. Future-dated posts stay \`draft: false\` with a
+      future \`publishedAt\` so the daily rebuild flips them live on the day.
+
+## 5. Brand voice & fatal sins — reasons to block the merge
+- [ ] **[human] No AI-speak** — zero *delve, tapestry, landscape, unleash,
+      revolutionize, unlock, beacon, realm, testament, in today's fast-paced world*.
+- [ ] **[human] No filler intro** — gets to the point; no throat-clearing.
+- [ ] **[human] Concrete over abstract** — claims grounded in real, named examples
+      (and ${brand}'s own stack / cases where natural), not hand-waving.
+
+## 6. Accuracy & sourcing
+- [ ] **[human] Verified stats.** Every figure links to a specific reputable source,
+      or is softened to a general statement. Never invent numbers.
+- [ ] **[human] Pricing caveat.** Currency figures carry "checked as of {year}" + an
+      inline link to the vendor's official pricing page.
+- [ ] **[human] Sources section** — bulleted, linking to direct URLs (the exact page),
+      not generic homepages.
+
+## 7. Grammar & mechanics
+- [ ] **[human] No typos** (e.g. *qualifer* -> *qualifier*).
+- [ ] **[human] Subject-verb agreement** + consistent tense.
+- [ ] **[human] Logical flow** — definitions precede the comparisons that use them.
+
+---
+
+## How to use this
+1. Open the post's PR — its preview deploy renders the draft (\`noindex\` banner).
+2. Confirm \`glint doctor\` is green -> every [doctor] item is cleared at once.
+3. Walk the [human] items against the rendered post **and** the Markdown source.
+4. Block on any §5 fatal sin, unsourced §6 claim, or a duplicate/scheduling issue.
+5. Approve -> merge -> the build publishes and emits the full SEO/AEO surface.
+
+> Onboarding generates this file for ${brand}. The brand specifics live in the docs
+> above, not here — so if the voice, keywords, categories, or CTAs change, update
+> *those* docs and every review stays current; the checklist keeps pointing at them.
+`;
+
 export async function runNew(args: string[]): Promise<void> {
   const flags = new Map<string, string>();
   for (let i = 0; i < args.length; i++) {
@@ -353,6 +505,7 @@ export async function runNew(args: string[]): Promise<void> {
   w("redirects.json", "[]\n");
   w("public/media/.gitkeep", "");
   w("docs/brand-voice.md", voiceTemplate(brand));
+  w("docs/blog-review-checklist.md", reviewChecklistTemplate(brand));
   w("AGENTS.md", agentsMd(brand, domain, collections, mount));
   w("GEMINI.md", `# GEMINI.md\n\n${pointer(brand)}`);
   w("CLAUDE.md", `# CLAUDE.md\n\n${pointer(brand)}`);

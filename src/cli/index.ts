@@ -12,6 +12,7 @@ import { runTheme } from "./commands/theme.js";
 import { runImport } from "./commands/import-wordpress.js";
 import { runDoctor } from "./commands/doctor.js";
 import { runBuild, runPreview } from "./commands/build.js";
+import { runSync } from "./commands/sync.js";
 
 const COMMANDS: Record<string, string> = {
   onboard: "Detect brand/tokens/host from an app + draft the site — `--app <repo> --apply`",
@@ -24,6 +25,7 @@ const COMMANDS: Record<string, string> = {
   preview: "Preview locally with drafts visible",
   doctor: "Validate schema, taxonomy, scaffolding leaks, internal links (the gate)",
   import: "Import content into Glint — e.g. `glint import wordpress --wxr <f>`",
+  sync: "Pull latest engine templates into this site — safe, never touches brand data",
 };
 
 const handlers: Record<string, (args: string[]) => Promise<void>> = {
@@ -37,6 +39,7 @@ const handlers: Record<string, (args: string[]) => Promise<void>> = {
   doctor: runDoctor,
   build: runBuild,
   preview: runPreview,
+  sync: runSync,
 };
 
 function help(): void {
