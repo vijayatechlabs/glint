@@ -6,3 +6,5 @@
  * is added next and will also be exported from this module.
  */
 export * from "./content/schema.js";
+export { glintSitemap } from "./integration/sitemap.js";
+export type { GlintSitemapOptions } from "./integration/sitemap.js";

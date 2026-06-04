@@ -32,11 +32,17 @@ const KNOWN_COLLECTIONS = ["blog", "case-studies", "news", "events", "profiles"]
 
 export async function runDoctor(args: string[]): Promise<void> {
   const flags = new Map<string, string>();
+  let strict = false;
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
-    if (a?.startsWith("--")) flags.set(a.slice(2), args[++i] ?? "");
+    if (a === "--strict") {
+      strict = true;
+    } else if (a?.startsWith("--")) {
+      flags.set(a.slice(2), args[++i] ?? "");
+    }
   }
   const dir = flags.get("dir") ?? process.cwd();
+  const warnSeverity: Severity = strict ? "ERROR" : "WARN";
 
   const posts = listPosts(dir);
   const categories = parseCategories(dir);
@@ -79,14 +85,14 @@ export async function runDoctor(args: string[]): Promise<void> {
     // 4. taxonomy registry compliance
     const cat = p.data.category as string | undefined;
     if (cat && categories.size && !categories.has(cat)) {
-      add(p.file, "WARN", `category "${cat}" not in data/categories.md`);
+      add(p.file, warnSeverity, `category "${cat}" not in data/categories.md`);
     }
     const postTags = Array.isArray(p.data.tags) ? (p.data.tags as string[]) : [];
     for (const t of postTags) {
-      if (tags.size && !tags.has(t)) add(p.file, "WARN", `tag "${t}" not in data/tags.md`);
+      if (tags.size && !tags.has(t)) add(p.file, warnSeverity, `tag "${t}" not in data/tags.md`);
     }
     if (!p.data.cover && KNOWN_COLLECTIONS.includes(p.collection) && p.collection !== "profiles") {
-      add(p.file, "WARN", "no cover image");
+      add(p.file, warnSeverity, "no cover image");
     }
 
     // 5. broken internal links (best-effort: links to /<collection>/<slug>)
@@ -105,17 +111,17 @@ export async function runDoctor(args: string[]): Promise<void> {
     const missingImage = (src: unknown): boolean =>
       typeof src === "string" && src.startsWith("/") && !existsSync(join(dir, "public", src));
     const cover = p.data.cover as { src?: string } | undefined;
-    if (cover?.src && missingImage(cover.src)) add(p.file, "WARN", `cover image not found: public${cover.src}`);
+    if (cover?.src && missingImage(cover.src)) add(p.file, warnSeverity, `cover image not found: public${cover.src}`);
     if (Array.isArray(p.data.images)) {
       for (const im of p.data.images as Array<{ src?: string }>) {
-        if (im?.src && missingImage(im.src)) add(p.file, "WARN", `image not found: public${im.src}`);
+        if (im?.src && missingImage(im.src)) add(p.file, warnSeverity, `image not found: public${im.src}`);
       }
     }
     for (const m of p.body.matchAll(/!\[([^\]]*)\]\(([^)\s]+)\)/g)) {
       const alt = m[1]!.trim();
       const src = m[2]!;
-      if (!alt) add(p.file, "WARN", `inline image missing alt text: ${src}`);
-      if (missingImage(src)) add(p.file, "WARN", `inline image not found: public${src}`);
+      if (!alt) add(p.file, warnSeverity, `inline image missing alt text: ${src}`);
+      if (missingImage(src)) add(p.file, warnSeverity, `inline image not found: public${src}`);
     }
   }
 

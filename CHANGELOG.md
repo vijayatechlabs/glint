@@ -9,6 +9,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- **pipeline**: Automated content pipeline with plays (`docs/pipeline/{plan,draft,images,review,ship}.md`), orchestration guide (`docs/CONTENT-PIPELINE.md`), and headless orchestrator bash script (`bin/glint-pipeline.sh`) supporting git worktree isolation for concurrent draft PRs.
+- **sync**: Added automatic generation and synchronization of Claude CLI command wrappers (`.claude/commands/`) and Antigravity workflow wrappers (`.agents/workflows/`), and recursive sync for Bucket 1 files.
+- **doctor**: `--strict` flag to escalate media (missing cover, cover/image not found, inline image missing alt/not found) and taxonomy (unknown category/tag) warnings to errors, failing the PR check.
 - **sync**: `glint sync [--dry-run]` — pulls latest engine templates into a brand
   site safely. Three-bucket model: overwrites engine-reference docs, regenerates
   engine-generated files (AGENTS.md, review checklist, agent rules) from current
@@ -30,6 +33,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **scaffold/AGENTS.md**: Hard rules updated — stagger publish dates, no duplicate
   posts, self-review against checklist before PR. All bare `glint` CLI invocations
   corrected to `pnpm glint` throughout.
+- **pipeline**: `bin/glint-pipeline.sh` now treats git commits idempotently, avoids
+  deleting existing `content/<slug>` branches/worktrees during batch runs, and leaves
+  `data/content-plan.md` unchanged so the caller does not end up with an uncommitted
+  backlog edit.
 - **docs/ARCHITECTURE.md**: §12 (Decisions) replaced with a pointer to
   `docs/DECISIONS.md`. Roadmap (§11) remains canonical — README now links there
   instead of duplicating the phase list.

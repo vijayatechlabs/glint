@@ -5,7 +5,7 @@
  * and agent files. Idempotent: only writes files that don't already exist, so it
  * is safe to run on a partially set-up repo to fill the gaps.
  */
-import { existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync, chmodSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -37,12 +37,16 @@ export function scaffoldDir(sub: string): string {
 
 /** Recursively copy the engine's Astro theme templates into the site, stripping
  *  the `.tmpl` suffix and never overwriting existing files. The `.tmpl` suffix
- *  keeps the templates out of the engine's own typecheck. */
-function copyTheme(themeRoot: string, dest: string, created: string[], skipped: string[]): void {
+ *  keeps the templates out of the engine's own typecheck.
+ *
+ *  `skipPrefix` – skip any entry whose relative path starts with this string
+ *  (use forward slashes, e.g. "src/pages/blog/"). */
+function copyTheme(themeRoot: string, dest: string, created: string[], skipped: string[], skipPrefix?: string): void {
   if (!existsSync(themeRoot)) return;
   const walk = (rel: string): void => {
     for (const entry of readdirSync(join(themeRoot, rel), { withFileTypes: true })) {
-      const childRel = rel ? join(rel, entry.name) : entry.name;
+      const childRel = rel ? `${rel}/${entry.name}` : entry.name;
+      if (skipPrefix && childRel.startsWith(skipPrefix)) continue;
       if (entry.isDirectory()) walk(childRel);
       else {
         const outRel = childRel.replace(/\.tmpl$/, "");
@@ -83,15 +87,30 @@ const packageJson = (slug: string) =>
     2,
   ) + "\n";
 
-const astroConfig = (siteUrl: string) =>
-  `import { defineConfig } from "astro/config";
-import sitemap from "@astrojs/sitemap";
+/** /blog → "sitemap-blog", /docs/api → "sitemap-docs-api" */
+function mountToSitemapName(mount: string): string {
+  const slug = mount.replace(/^\/+|\/+$/g, "").replace(/\//g, "-");
+  return slug ? `sitemap-${slug}` : "sitemap-index";
+}
+
+const astroConfig = (siteUrl: string, mount?: string) => {
+  const hasBase = Boolean(mount && mount !== "/");
+  const baseLine = hasBase ? `\n  base: ${JSON.stringify(mount)},` : "";
+  const imports = hasBase
+    ? `import sitemap from "@astrojs/sitemap";\nimport { glintSitemap } from "@vijayatech/glint";`
+    : `import sitemap from "@astrojs/sitemap";`;
+  const integrations = hasBase
+    ? `[sitemap(), glintSitemap({ sitemapName: ${JSON.stringify(mountToSitemapName(mount!))} })]`
+    : `[sitemap()]`;
+  return `import { defineConfig } from "astro/config";
+${imports}
 
 export default defineConfig({
-  site: ${JSON.stringify(siteUrl)},
-  integrations: [sitemap()],
+  site: ${JSON.stringify(siteUrl)},${baseLine}
+  integrations: ${integrations},
 });
 `;
+};
 
 // theme.css holds ONLY brand tokens (regenerate with `glint theme pull`).
 // Structural CSS lives in the theme's src/styles/base.css (engine-owned).
@@ -186,6 +205,31 @@ cover: { src: /media/<slug>.png, alt: "describes the image + relevance" }
 ---
 \`\`\`
 
+## Pipeline commands
+
+Run these slash commands or CLI equivalents to execute the content pipeline:
+
+- **plan**: Proposals & shortlists.
+  - Claude: \`/plan\` or \`claude -p "/plan"\`
+  - Antigravity: \`/plan\` or \`gemini -p "$(cat docs/pipeline/plan.md)"\`
+  - Codex: \`codex exec "Run docs/pipeline/plan.md"\`
+- **draft**: Write draft based on topic/slug.
+  - Claude: \`/draft <topic>\` or \`claude -p "/draft <topic>"\`
+  - Antigravity: \`/draft <topic>\` or \`gemini -p "$(cat docs/pipeline/draft.md)\\n\\nTopic: <topic>"\`
+  - Codex: \`codex exec "Run docs/pipeline/draft.md for <topic>"\`
+- **images**: Generate cover & inline images.
+  - Claude: \`/images <slug>\` or \`claude -p "/images <slug>"\`
+  - Antigravity: \`/images <slug>\` or \`gemini -p "$(cat docs/pipeline/images.md)\\n\\nSlug: <slug>"\`
+  - Codex: \`codex exec "Run docs/pipeline/images.md for <slug>"\`
+- **review**: Verify post against style & rules.
+  - Claude: \`/review <slug>\` or \`claude -p "/review <slug>"\`
+  - Antigravity: \`/review <slug>\` or \`gemini -p "$(cat docs/pipeline/review.md)\\n\\nSlug: <slug>"\`
+  - Codex: \`codex exec "Run docs/pipeline/review.md for <slug>"\`
+- **ship**: Pre-merge quality gate check.
+  - Claude: \`/ship <slug>\` or \`claude -p "/ship <slug>"\`
+  - Antigravity: \`/ship <slug>\` or \`gemini -p "$(cat docs/pipeline/ship.md)\\n\\nSlug: <slug>"\`
+  - Codex: \`codex exec "Run docs/pipeline/ship.md for <slug>"\`
+
 ## Content generation (how to write a post)
 1. **Ideate.** Read \`data/content-strategy.md\` (pick a Pillar + Type). Scan existing
    \`content/\` and \`data/content-plan.md\` to avoid duplication and find gaps.
@@ -248,6 +292,12 @@ The maintainer changes Glint; you pull the update.
 
 Engine reference: \`@vijayatech/glint\` → \`docs/AGENT-GUIDE.md\`, \`docs/INIT.md\`, \`docs/FEEDBACK.md\`.
 `;
+
+export const claudeCommand = (stage: string) =>
+  `# /${stage}\n\nFollow the steps in \`docs/pipeline/${stage}.md\` for $ARGUMENTS.\n`;
+
+export const antigravityWorkflow = (stage: string) =>
+  `# /${stage}\n\nFollow the steps in \`docs/pipeline/${stage}.md\` for $ARGUMENTS.\n`;
 
 export const pointer = (brand: string) =>
   `# Follow \`AGENTS.md\` in this repo as your standing instructions, and read
@@ -517,14 +567,48 @@ export async function runNew(args: string[]): Promise<void> {
   w("CLAUDE.md", `# CLAUDE.md\n\n${pointer(brand)}`);
   w(".agents/rules/glint.md", workspaceRule(brand));
 
+  const stages = ["plan", "draft", "images", "review", "ship"];
+  for (const stage of stages) {
+    w(`.claude/commands/${stage}.md`, claudeCommand(stage));
+    w(`.agents/workflows/${stage}.md`, antigravityWorkflow(stage));
+  }
+
+  // Copy and chmod the headless orchestrator.
+  let shContent = "";
+  try {
+    const shSrc = join(scaffoldDir("bin"), "glint-pipeline.sh");
+    if (existsSync(shSrc)) {
+      shContent = readFileSync(shSrc, "utf8");
+    }
+  } catch {
+    // skip if bin scaffold doesn't exist
+  }
+  if (shContent) {
+    w("bin/glint-pipeline.sh", shContent);
+    try {
+      chmodSync(join(dir, "bin/glint-pipeline.sh"), 0o755);
+    } catch {
+      // ignore chmod errors
+    }
+  }
+
   // Astro rendering layer: brand-aware generated files + the copied theme.
   const slug = brand.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "site";
   w("package.json", packageJson(slug));
-  w("astro.config.ts", astroConfig(`https://${domain}`));
+  w("astro.config.ts", astroConfig(`https://${domain}`, mount || undefined));
   w("public/theme.css", themeCss(brand));
   w("public/custom.css", customCss(brand));
-  copyTheme(scaffoldDir("theme"), dir, created, skipped);
-  // ship the content playbook (static engine reference) into the brand's docs/
+
+  const isMounted = Boolean(mount && mount !== "/");
+  if (isMounted) {
+    // Mounted sub-path (e.g. /blog): copy shared theme but skip the nested blog/
+    // routes, then copy the flat page routes that work correctly with Astro `base`.
+    copyTheme(scaffoldDir("theme"), dir, created, skipped, "src/pages/blog/");
+    copyTheme(scaffoldDir("theme-mounted-pages"), dir, created, skipped);
+  } else {
+    copyTheme(scaffoldDir("theme"), dir, created, skipped);
+  }
+  // Ship the static engine reference docs into the brand's docs/.
   copyTheme(scaffoldDir("docs"), join(dir, "docs"), created, skipped);
 
   // Warn about non-blog collections: schemas are registered and doctor validates them,
@@ -544,5 +628,5 @@ export async function runNew(args: string[]): Promise<void> {
     console.log(`  skipped existing (${skipped.length}):`);
     skipped.forEach((p) => console.log(`    · ${p.replace(dir + "/", "")}`));
   }
-  console.log(`\n  next: draft docs/brand-voice.md, then write content as drafts → PR.\n`);
+  console.log(`\n  next: draft docs/brand-voice.md, run /draft or bin/glint-pipeline.sh batch, then review drafts → PR.\n`);
 }

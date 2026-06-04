@@ -110,3 +110,14 @@ Edit this guide to change how agents behave. The brand repo's `AGENTS.md` is the
 always-on entry point every tool reads; `GEMINI.md` (Antigravity/Gemini) and
 `CLAUDE.md` (Claude Code) just point to it. Keep them as thin pointers so the
 three tools never drift.
+
+## 9. Content Pipeline & Plays
+
+Glint implements an automated multi-tool content pipeline defined by canonical plays.
+See `docs/CONTENT-PIPELINE.md` for the pipeline orchestration details and role mapping.
+The canonical steps for each stage are defined in:
+- `docs/pipeline/plan.md` — proposal and shortlisting of titles
+- `docs/pipeline/draft.md` — content writing and branch creation
+- `docs/pipeline/images.md` — cover and inline image generation
+- `docs/pipeline/review.md` — brand and strict quality check
+- `docs/pipeline/ship.md` — final pre-merge quality gate

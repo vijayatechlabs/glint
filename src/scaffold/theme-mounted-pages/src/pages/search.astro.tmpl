@@ -1,0 +1,21 @@
+---
+import Base from "../layouts/Base.astro";
+import { site } from "../../data/site.config";
+// Pagefind bundle is at the blog root — derive absolute URLs from site.baseUrl.
+const siteBase = site.baseUrl.replace(/\/?$/, "");
+const pagefindCss = `${siteBase}/pagefind/pagefind-ui.css`;
+const pagefindJs = `${siteBase}/pagefind/pagefind-ui.js`;
+---
+
+<Base title="Search" description="Search the blog" noindex={true}>
+  <h1>Search</h1>
+  <link rel="stylesheet" href={pagefindCss} />
+  <div id="search"></div>
+  <script define:vars={{ pagefindJs }}>
+    // Load Pagefind UI from its absolute URL (supports any mount path).
+    const s = document.createElement("script");
+    s.src = pagefindJs;
+    s.onload = () => new PagefindUI({ element: "#search", showSubResults: true, showImages: false });
+    document.head.appendChild(s);
+  </script>
+</Base>

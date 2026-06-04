@@ -77,3 +77,10 @@ The changelog's `[Unreleased]` section is the "what just changed" view; that's e
 checklist references brand-specific docs (voice, strategy, taxonomy, CTAs). Baking
 brand names and doc paths into a static copy would require manual updates on every
 brand; generating it means it's always current and correctly pointed.
+
+---
+
+## 2026-06-05
+
+**Decision 11 — Multi-tool pipeline plays & wrappers structure**
+The content pipeline plays (`docs/pipeline/*.md`) and orchestration documentation (`docs/CONTENT-PIPELINE.md`) are managed as static engine references (Bucket 1). Command wrappers for Claude Code and Antigravity are engine-generated (Bucket 2) so they update dynamically during sync. Customization of voice, strategy, and content is preserved in Bucket 3. The pipeline's automated execution utilizes local subscription state (no metered API keys) and enforces quality via the `glint doctor --strict` gate.

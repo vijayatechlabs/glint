@@ -1,0 +1,14 @@
+import type { APIContext } from "astro";
+import { site } from "../../data/site.config";
+
+// SEO: allow all crawlers and point them at the custom-named sitemap.
+export async function GET(context: APIContext) {
+  // Derive sitemap name from mount path: /blog → sitemap-blog.xml
+  const mountSlug = site.mount.replace(/^\/+|\/+$/g, "").replace(/\//g, "-");
+  const sitemapFile = mountSlug ? `sitemap-${mountSlug}.xml` : "sitemap-index.xml";
+  const sitemap = new URL(`${import.meta.env.BASE_URL}${sitemapFile}`, context.site).href;
+  const body = `User-agent: *\nAllow: /\n\nSitemap: ${sitemap}\n`;
+  return new Response(body, {
+    headers: { "Content-Type": "text/plain; charset=utf-8" },
+  });
+}

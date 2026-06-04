@@ -1,0 +1,80 @@
+---
+import { render } from "astro:content";
+import Base from "../layouts/Base.astro";
+import { site } from "../../data/site.config";
+import { pagePosts, publicPosts, relatedTo } from "../posts";
+
+export async function getStaticPaths() {
+  const posts = await pagePosts();
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const base = import.meta.env.BASE_URL;
+const url = new URL(`${base}${post.id}/`, Astro.site).href;
+
+const words = post.body?.trim().split(/\s+/).length ?? 0;
+const readingTime = Math.max(1, Math.round(words / 200));
+const related = relatedTo(post, await publicPosts());
+
+const blogPosting = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: post.data.title,
+  description: post.data.summary,
+  datePublished: post.data.publishedAt.toISOString(),
+  dateModified: (post.data.updatedAt ?? post.data.publishedAt).toISOString(),
+  mainEntityOfPage: url,
+  ...(post.data.cover ? { image: new URL(post.data.cover.src, Astro.site).href } : {}),
+};
+const breadcrumb = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    // Home points to the main domain — the blog is embedded in the wider site.
+    { "@type": "ListItem", position: 1, name: "Home", item: `https://${site.domain}` },
+    { "@type": "ListItem", position: 2, name: post.data.title, item: url },
+  ],
+};
+---
+
+<Base
+  title={post.data.title}
+  description={post.data.summary}
+  canonical={url}
+  image={post.data.cover?.src}
+  noindex={post.data.draft}
+  jsonLd={[blogPosting, breadcrumb]}
+>
+  {post.data.draft && <p><strong>⚠ DRAFT — not published (preview only)</strong></p>}
+  <article data-pagefind-body>
+    <h1>{post.data.title}</h1>
+    <p class="meta">
+      <time datetime={post.data.publishedAt.toISOString()}>
+        {post.data.publishedAt.toISOString().slice(0, 10)}
+      </time>
+      · {readingTime} min read
+      {post.data.category && <> · <a href={`${base}category/${post.data.category}/`}>{post.data.category}</a></>}
+    </p>
+    <Content />
+    {post.data.tags.length > 0 && (
+      <p class="tags">
+        {post.data.tags.map((t) => <a href={`${base}tag/${t}/`}>#{t}</a>)}
+      </p>
+    )}
+  </article>
+
+  {related.length > 0 && (
+    <aside class="related">
+      <h2>Related</h2>
+      <ul class="post-list">
+        {related.map((p) => (
+          <li><a href={`${base}${p.id}/`}>{p.data.title}</a></li>
+        ))}
+      </ul>
+    </aside>
+  )}
+
+  <p><a href={base}>← All posts</a></p>
+</Base>

@@ -4,7 +4,7 @@
  * Pulls the latest engine templates into the brand site without touching brand
  * data. Three-bucket model:
  *
- *   1. Engine-reference  — pure engine docs (content-playbook.md).
+ *   1. Engine-reference  — pure engine docs and scripts (content-playbook, pipeline plays, orchestrator).
  *                          Always overwritten; no user data lives here.
  *   2. Engine-generated  — files built from brand config (AGENTS.md, checklist…).
  *                          Regenerated using current data/site.config.ts values.
@@ -14,9 +14,9 @@
  * Run after `pnpm update @vijayatech/glint` to pull engine doc improvements
  * into your brand site in one step.
  */
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
-import { agentsMd, pointer, reviewChecklistTemplate, scaffoldDir, workspaceRule } from "./new.js";
+import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync, chmodSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { agentsMd, pointer, reviewChecklistTemplate, scaffoldDir, workspaceRule, claudeCommand, antigravityWorkflow } from "./new.js";
 
 interface SiteConfig {
   brand: string;
@@ -61,7 +61,10 @@ function syncFile(
   results: SyncResult[],
 ): void {
   if (!existsSync(absPath)) {
-    if (!dryRun) writeFileSync(absPath, content);
+    if (!dryRun) {
+      mkdirSync(dirname(absPath), { recursive: true });
+      writeFileSync(absPath, content);
+    }
     results.push({ path: relPath, status: "created" });
     return;
   }
@@ -98,7 +101,20 @@ export async function runSync(args: string[]): Promise<void> {
   try { docsRoot = scaffoldDir("docs"); } catch { /* scaffold not found — skip */ }
 
   if (docsRoot) {
-    const refFiles = ["content-playbook.md"];
+    const walkDocs = (rel: string): string[] => {
+      const files: string[] = [];
+      const entries = readdirSync(join(docsRoot!, rel), { withFileTypes: true });
+      for (const entry of entries) {
+        const childRel = rel ? join(rel, entry.name) : entry.name;
+        if (entry.isDirectory()) {
+          files.push(...walkDocs(childRel));
+        } else {
+          files.push(childRel);
+        }
+      }
+      return files;
+    };
+    const refFiles = walkDocs("");
     for (const f of refFiles) {
       const absPath = join(dir, "docs", f);
       const srcPath = join(docsRoot, f);
@@ -107,7 +123,33 @@ export async function runSync(args: string[]): Promise<void> {
       const before = existsSync(absPath) ? readFileSync(absPath, "utf8") : "";
       syncFile(absPath, `docs/${f}`, engineContent, dryRun, refResults);
       const last = refResults[refResults.length - 1]!;
-      if (last.status === "updated") last.delta = lineDelta(before, engineContent);
+      if (last.status === "updated" || last.status === "created") {
+        last.delta = lineDelta(before, engineContent);
+      }
+    }
+  }
+
+  // Sync bin/glint-pipeline.sh
+  let binRoot: string | undefined;
+  try { binRoot = scaffoldDir("bin"); } catch { /* scaffold not found — skip */ }
+  if (binRoot) {
+    const absPath = join(dir, "bin", "glint-pipeline.sh");
+    const srcPath = join(binRoot, "glint-pipeline.sh");
+    if (existsSync(srcPath)) {
+      const engineContent = readFileSync(srcPath, "utf8");
+      const before = existsSync(absPath) ? readFileSync(absPath, "utf8") : "";
+      syncFile(absPath, "bin/glint-pipeline.sh", engineContent, dryRun, refResults);
+      const last = refResults[refResults.length - 1]!;
+      if (last.status === "updated" || last.status === "created") {
+        last.delta = lineDelta(before, engineContent);
+      }
+      if (!dryRun) {
+        try {
+          chmodSync(absPath, 0o755);
+        } catch {
+          // ignore chmod errors
+        }
+      }
     }
   }
 
@@ -120,13 +162,21 @@ export async function runSync(args: string[]): Promise<void> {
     [".agents/rules/glint.md", () => workspaceRule(brand)],
   ];
 
+  const stages = ["plan", "draft", "images", "review", "ship"];
+  for (const stage of stages) {
+    generated.push([`.claude/commands/${stage}.md`, () => claudeCommand(stage)]);
+    generated.push([`.agents/workflows/${stage}.md`, () => antigravityWorkflow(stage)]);
+  }
+
   for (const [relPath, generate] of generated) {
     const absPath = join(dir, relPath);
     const newContent = generate();
     const before = existsSync(absPath) ? readFileSync(absPath, "utf8") : "";
     syncFile(absPath, relPath, newContent, dryRun, genResults);
     const last = genResults[genResults.length - 1]!;
-    if (last.status === "updated") last.delta = lineDelta(before, newContent);
+    if (last.status === "updated" || last.status === "created") {
+      last.delta = lineDelta(before, newContent);
+    }
   }
 
   // ── Bucket 3: Brand-owned — list but never touch ──────────────────────────
