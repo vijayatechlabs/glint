@@ -6,7 +6,7 @@ tags: [domains]
 publishedAt: 2026-02-01T00:00:00.000Z
 draft: true
 cover:
-  src: /media/draft.png
+  src: /media/cover.svg
   alt: "Placeholder cover for a draft post"
 ---
 

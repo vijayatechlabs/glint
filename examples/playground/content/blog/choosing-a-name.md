@@ -6,7 +6,7 @@ tags: [sanskrit]
 publishedAt: 2026-01-15T00:00:00.000Z
 draft: false
 cover:
-  src: /media/choosing-a-name.png
+  src: /media/cover.svg
   alt: "A shortlist of candidate names on a whiteboard"
 ---
 
