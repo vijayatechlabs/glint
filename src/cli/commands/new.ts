@@ -112,6 +112,10 @@ const themeCss = (brand: string) =>
 
 const customCss = (brand: string) =>
   `/* ${brand} — brand-specific overrides. Glint won't touch this file. */
+
+/* Mounted under a host site with a fixed/sticky header? Set its height so blog
+   content clears the navbar (consumed by base.css \`main\` padding-top). */
+/* :root { --header-h: 80px; } */
 `;
 
 const siteConfig = (brand: string, domain: string, baseUrl: string, collections: string[], mount: string, target: string) =>

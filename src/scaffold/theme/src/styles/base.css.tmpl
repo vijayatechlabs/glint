@@ -26,7 +26,10 @@ img { max-width: 100%; height: auto; }
 .site-header nav a { margin-left: 1.1rem; color: var(--muted, #6b7280); }
 .site-header nav a:hover { color: var(--fg, #1a1a1a); }
 
-main { padding-block: 2rem; }
+/* --header-h clears a fixed/sticky HOST header when the blog is mounted at a
+   sub-path (e.g. /blog). Defaults to 0 for standalone use; brands set it in
+   public/custom.css to match their navbar height. */
+main { padding-block: 2rem; padding-top: calc(2rem + var(--header-h, 0px)); }
 
 .site-footer {
   margin-top: 3rem; padding-block: 1.25rem; font-size: .9rem;
