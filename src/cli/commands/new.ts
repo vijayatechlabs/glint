@@ -124,6 +124,7 @@ export const site = {
   deployTarget: ${JSON.stringify(target)},          // cf-pages | coolify | netlify | vercel
   collections: ${JSON.stringify(collections)},
   logo: "",                          // e.g. "/media/logo.svg"; "" shows the brand name
+  favicon: "",                       // e.g. "/favicon.png" — match the host site's icon
   nav: [{ label: "Home", href: ${JSON.stringify(`https://${domain}`)} }],
   footer: [],                        // [{ label, href }] — privacy, contact, etc.
   social: {},                        // { twitter, github, linkedin }
