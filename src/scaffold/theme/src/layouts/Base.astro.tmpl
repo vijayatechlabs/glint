@@ -39,6 +39,10 @@ const siteBase = site.baseUrl.replace(/\/?$/, "");
 
     <link rel="alternate" type="application/rss+xml" title="RSS" href={new URL("/rss.xml", Astro.site).href} />
 
+    {/* Brand favicon (set `favicon` in site.config). siteBase keeps it correct
+        when mounted at a sub-path so it matches the host site's icon. */}
+    {site.favicon && <link rel="icon" href={`${siteBase}${site.favicon}`} />}
+
     <!-- Brand tokens: absolute URLs so the blog loads them correctly when mounted
          at a sub-path (e.g. domain.com/blog). Regenerate with `glint theme pull`. -->
     <link rel="stylesheet" href={`${siteBase}/theme.css`} />
