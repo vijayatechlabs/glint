@@ -149,7 +149,15 @@ export const site = {
   collections: ${JSON.stringify(collections)},
   logo: "",                          // e.g. "/media/logo.svg"; "" shows the brand name
   favicon: "",                       // e.g. "/favicon.png" — match the host site's icon
-  nav: [{ label: "Home", href: ${JSON.stringify(`https://${domain}`)} }],
+  nav: [
+    { label: "Services", href: ${JSON.stringify(`https://${domain}/services`)} },
+    { label: "Case Studies", href: ${JSON.stringify(`https://${domain}/case-studies`)} },
+    { label: "Industries", href: ${JSON.stringify(`https://${domain}/industries`)} },
+    { label: "Pricing", href: ${JSON.stringify(`https://${domain}/pricing`)} },
+    { label: "Blog", href: ${JSON.stringify(mount ? baseUrl : `https://${domain}/blog`)} },
+    { label: "About", href: ${JSON.stringify(`https://${domain}/about`)} },
+    { label: "Book a call", href: ${JSON.stringify(`https://${domain}/contact`)} }
+  ],
   footer: [],                        // [{ label, href }] — privacy, contact, etc.
   social: {},                        // { twitter, github, linkedin }
   seo: {

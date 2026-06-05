@@ -1,6 +1,6 @@
 {
   "name": "@vijayatech/glint",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "The lightning publishing engine for the AI era — git-native, static-output, agent-first, SEO/AEO-native.",
   "type": "module",
   "license": "MIT",

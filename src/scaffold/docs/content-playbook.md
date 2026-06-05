@@ -42,12 +42,13 @@ section can be lifted and cited:
    bullets for sets. Engines pull tables and lists directly. (Glint also emits
    JSON-LD: Article + Breadcrumb today; FAQ/HowTo where you use those patterns.)
 6. **TL;DR / key takeaways.** A short summary block — the most quotable unit.
-7. **Freshness for time-sensitive posts.** Dates and "as of {year}"; don't assert
+7. **Internal Linking Guidance.** Scan existing articles/pages in `content/` and construct a relevant context graph before drafting. Embed internal links naturally within new blog posts using both contextual and commercial anchor texts.
+8. **Freshness for time-sensitive posts.** Dates and "as of {year}"; don't assert
    decaying facts (e.g. "domain X is available") as permanent — frame and link.
-8. **Cite your sources.** Link authoritative references; engines favor sourced
+9. **Cite your sources.** Link authoritative references; engines favor sourced
    content and may cite you back.
-9. **Plain, concise, specific.** Short sentences, no filler/clichés, real examples.
-10. **E-E-A-T.** Name an author; bring original data, examples, or a clear POV.
+10. **Plain, concise, specific.** Short sentences, no filler/clichés, real examples.
+11. **E-E-A-T.** Name an author; bring original data, examples, or a clear POV.
 
 ## 3. What to put in the Markdown (the AEO twin)
 
@@ -66,7 +67,7 @@ category: naming-strategy
 tags: [naming, domains, legal]
 publishedAt: 2026-06-03T00:00:00.000Z
 author: prasad            # → data/team.json
-draft: true
+draft: true               # ALWAYS default to true for new drafts!
 cover: { src: /media/<slug>.png, alt: "describes the image + relevance" }
 ---
 
@@ -98,8 +99,10 @@ text · sources for any claim/stat · no decaying "facts" · on brand voice.
 
 ## 4. The agent's job
 
-When asked to write, the agent: reads `data/content-strategy.md` (pick a Pillar +
-Type), scans existing `content/` to avoid duplication and find gaps, **researches
-with its native web search and cites sources**, proposes titles for approval, then
-drafts to this playbook + the brand voice + the frontmatter contract — `draft: true`
-→ `glint doctor` → PR.
+When asked to plan and write, the agent MUST:
+1. **Audit:** Scan existing `content/blog/` for ad-hoc posts, categories, and topic diversity to avoid over-indexing on a single subject. Check if the physical file already exists before drafting to prevent duplication.
+2. **Balance & Schedule:** Propose batches that balance topics. For `publishedAt` dates, assign staggered intervals (e.g. day-by-day or max 2 blogs per day). Avoid bulk daily dumps.
+3. **Research & Link:** Use native web search, cite sources, and embed contextual internal links.
+4. **Draft:** Draft to this playbook + the brand voice. **Mandatory:** All new drafts must use `draft: true` in the frontmatter.
+5. **Update Tracker:** Update the status (e.g. to "Drafting" or "Scheduled") in the `content-plan.md` pipeline table as soon as progress is made, and remove entries when published.
+6. **Ship:** `glint doctor` → PR.

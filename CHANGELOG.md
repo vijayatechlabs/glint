@@ -8,7 +8,13 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+---
+
+## [0.1.1] — 2026-06-05
+
 ### Added
+- **tooling**: Provided a GitHub Actions cron template (`src/scaffold/theme/.github/workflows/publish-scheduled.yml.tmpl`) that automatically scans the repository for `draft: true` posts with a past/present `publishedAt` date, sets them to `draft: false`, and commits the changes.
+- **tooling**: Created `docs/glint-feedback-instructions.md` to instruct AI agents on correctly routing engine-level feedback to `vijayatechlabs/glint` using the `gh` CLI.
 - **pipeline**: Automated content pipeline with plays (`docs/pipeline/{plan,draft,images,review,ship}.md`), orchestration guide (`docs/CONTENT-PIPELINE.md`), and headless orchestrator bash script (`bin/glint-pipeline.sh`) supporting git worktree isolation for concurrent draft PRs.
 - **sync**: Added automatic generation and synchronization of Claude CLI command wrappers (`.claude/commands/`) and Antigravity workflow wrappers (`.agents/workflows/`), and recursive sync for Bucket 1 files.
 - **doctor**: `--strict` flag to escalate media (missing cover, cover/image not found, inline image missing alt/not found) and taxonomy (unknown category/tag) warnings to errors, failing the PR check.
@@ -30,6 +36,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and maintenance rules so the discipline is self-documenting.
 
 ### Changed
+- **scaffold/docs**: Updated `CONTENT-PIPELINE.md` to define an Active Pipeline Table structure that drops published entries to rely on physical files.
+- **scaffold/docs**: Updated `content-playbook.md` agent instructions to mandate `draft: true` for all new drafts, explicitly guide contextual internal linking, balance topics before batching, and stagger publishing dates.
+- **scaffold/theme**: Updated `new.ts` so the scaffolded `site.config.ts` matches the marketing site's default navigation order.
 - **scaffold/AGENTS.md**: Hard rules updated — stagger publish dates, no duplicate
   posts, self-review against checklist before PR. All bare `glint` CLI invocations
   corrected to `pnpm glint` throughout.

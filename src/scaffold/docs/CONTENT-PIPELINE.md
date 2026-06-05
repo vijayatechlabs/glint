@@ -34,6 +34,13 @@ data/content-plan.md  ──/plan──▶  titles (idea→approved)
 Every new post must be developed on a dedicated branch named:
 `content/<slug>`
 
+## Content Plan Structure
+
+The `data/content-plan.md` file must be maintained as an **Active Pipeline Table** to prevent bloat. 
+- Use the following columns: `Target Date | Category | Title | Status | Notes`.
+- Order future-first, with active drafts and upcoming scheduled posts at the top.
+- **Archive Roll-off**: Once a post is published, **remove its entry** from `content-plan.md`. The physical `.md` files in `content/blog/` act as the permanent historical record.
+
 ## Local Review & Subscription Setup
 
 This pipeline is powered by your local CLI tool subscriptions:
