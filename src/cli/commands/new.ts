@@ -217,7 +217,8 @@ cover: { src: /media/<slug>.png, alt: "describes the image + relevance" }
 
 Run these slash commands or CLI equivalents to execute the content pipeline:
 
-- **plan**: Proposals & shortlists.
+- **plan**: Proposals & shortlists; also drains product briefs handed over from the
+  app (\`CONTENT-INBOX.md\` or \`content\`-labelled issues) into \`data/content-plan.md\`.
   - Claude: \`/plan\` or \`claude -p "/plan"\`
   - Antigravity: \`/plan\` or \`gemini -p "$(cat docs/pipeline/plan.md)"\`
   - Codex: \`codex exec "Run docs/pipeline/plan.md"\`
@@ -240,7 +241,11 @@ Run these slash commands or CLI equivalents to execute the content pipeline:
 
 ## Content generation (how to write a post)
 1. **Ideate.** Read \`data/content-strategy.md\` (pick a Pillar + Type). Scan existing
-   \`content/\` and \`data/content-plan.md\` to avoid duplication and find gaps.
+   \`content/\` and \`data/content-plan.md\` to avoid duplication and find gaps. Also
+   drain any product briefs handed over from the app (\`CONTENT-INBOX.md\` or open
+   \`content\`-labelled issues) into the backlog first — these are shipped features
+   waiting to become posts. To verify a feature before writing, open the **source
+   app** (path/repo in \`data/content-strategy.md\`).
 2. **Research.** Use your native web search; **cite sources**; never invent stats or
    assert decaying facts (prices, "available domains") as permanent.
 3. **Propose titles first.** Offer a short shortlist (log to \`data/content-plan.md\` as
@@ -379,6 +384,15 @@ const contentStrategyTemplate = (brand: string) =>
 The "brain" agents read before writing. Defines what to write & why. Pair with
 \`docs/content-playbook.md\` (types + AEO frameworks), \`docs/brand-voice.md\` (tone),
 and \`data/categories.md\` / \`data/tags.md\` (taxonomy).
+
+## Source app (the product this blog supports)
+The app/site whose shipped features become posts here — the reverse of that app's
+OpenStart \`**Content path:**\`. Optional, but handy: open it to verify a feature,
+read its changelog, or pull context before drafting a post about it. Fill ONE or
+both (leave the other as TODO):
+
+**Source app path:** TODO: ../the-app
+**Source app repo:** TODO: owner/the-app
 
 ## Mission / Vision
 <Why ${brand} exists and who it serves. Content should advance this.>

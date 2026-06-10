@@ -1,0 +1,34 @@
+name: Content brief
+description: A shipped, user-facing feature from a product/app to turn into a blog post (handed over via OpenStart's content handoff).
+title: "[content]: "
+labels: ["content"]
+body:
+  - type: input
+    id: feature
+    attributes:
+      label: Feature
+      description: What shipped (one line). Becomes the working title.
+    validations:
+      required: true
+  - type: input
+    id: audience
+    attributes:
+      label: Audience
+      description: Who the post is for (e.g. fleet managers, first-time buyers).
+  - type: textarea
+    id: angle
+    attributes:
+      label: Angle / hook
+      description: Why it matters to that audience — the story, not the changelog line.
+    validations:
+      required: true
+  - type: input
+    id: keyword
+    attributes:
+      label: Target keyword
+      description: Primary search term for AEO/SEO.
+  - type: input
+    id: source
+    attributes:
+      label: Source project
+      description: Which app/site repo shipped this.

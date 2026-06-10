@@ -5,8 +5,11 @@ This document defines the automated orchestration pipeline for drafting, reviewi
 ## Design Flow
 
 ```
+  (optional upstream) product/app ships a feature → OpenStart content handoff
+        │   CONTENT-INBOX.md (local)  or  a `content`-labelled GitHub issue
+        ▼
 data/content-plan.md  ──/plan──▶  titles (idea→approved)
-        │
+        │   (/plan drains the intake into the backlog first — see docs/pipeline/plan.md)
         ▼
   /draft  (Gemini ⟶ Antigravity, or Codex)   → content/blog/<slug>.md (draft:true, branch content/<slug>)
         │
@@ -22,6 +25,21 @@ data/content-plan.md  ──/plan──▶  titles (idea→approved)
         ▼
   HUMAN runs glint preview locally, flips draft:false, merges PR  →  CI build → CDN
 ```
+
+## Receiving product briefs (OpenStart handoff)
+
+When the app/site this blog supports ships a user-facing feature, its OpenStart
+project hands a **content brief** to this repo — so product news becomes content
+without anyone re-explaining what shipped. Briefs arrive one of two ways:
+
+- **Local mode** → appended to `CONTENT-INBOX.md` at this repo's root.
+- **GitHub mode** → filed as an issue labelled `content` (structured by
+  `.github/ISSUE_TEMPLATE/content-brief.yml`).
+
+A brief is a *seed*, not a post: it carries Feature, Audience, Angle, Keyword, and
+the source project. `/plan` drains these into `data/content-plan.md` (see
+`docs/pipeline/plan.md`), after which they flow through draft → images → review →
+ship like any other post. The blog still owns voice, taxonomy, and the publish gate.
 
 ## Role Map
 

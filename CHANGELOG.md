@@ -8,6 +8,21 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+- **pipeline**: Receive content briefs handed over from product/app projects (the
+  OpenStart content handoff). `/plan` now drains a root `CONTENT-INBOX.md` and open
+  `content`-labelled issues into `data/content-plan.md` before brainstorming
+  (`docs/pipeline/plan.md`, `docs/CONTENT-PIPELINE.md`).
+- **scaffold**: Ship a `content-brief` GitHub issue form
+  (`src/scaffold/theme/.github/ISSUE_TEMPLATE/content-brief.yml`) so GitHub-mode
+  briefs arrive structured; new sites get it via `glint new`.
+- **AGENTS.md**: Note the product-brief intake in the generated operating contract
+  (the `plan` pipeline command and the Ideate step).
+- **content-strategy**: Seed an optional **Source app** back-pointer
+  (`**Source app path:**` / `**Source app repo:**`) so the blog records the product
+  it supports — the reverse of the app's OpenStart `**Content path:**` — letting an
+  agent open the app to verify a feature before writing.
+
 ---
 
 ## [0.1.1] — 2026-06-05
