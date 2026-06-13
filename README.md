@@ -75,6 +75,7 @@ a separate repo, onboarded from the engine.
 
 - [`docs/GETTING-STARTED.md`](docs/GETTING-STARTED.md) — **start here** — how to begin in Claude / Gemini-Antigravity / Codex, for any project state.
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — layers, contract, roadmap, decisions.
+- [`docs/POSITIONING.md`](docs/POSITIONING.md) — product wedge, buyer definition, differentiators, distribution playbook.
 - [`docs/DECISIONS.md`](docs/DECISIONS.md) — append-only ADR log (why, not what).
 - [`docs/AGENT-GUIDE.md`](docs/AGENT-GUIDE.md) — the agent-agnostic operating contract.
 - [`docs/INIT.md`](docs/INIT.md) — the state-aware init system (fresh/migration/adopt/established).
