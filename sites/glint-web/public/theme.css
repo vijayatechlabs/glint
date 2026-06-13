@@ -1,0 +1,14 @@
+/* Glint — brand design tokens.
+   Mirror your app's palette + type so the blog blends in.
+   Regenerate from the app with: glint theme pull --tailwind <path>. */
+:root {
+  --bg: #0f172a;
+  --fg: #f1f5f9;
+  --muted: #94a3b8;
+  --border: #1e293b;
+  --brand: #f59e0b;
+  --brand-hover: #d97706;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --maxw: 740px;
+  --radius: 6px;
+}

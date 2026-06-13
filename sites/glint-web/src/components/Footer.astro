@@ -1,0 +1,15 @@
+---
+// Static, token-styled site footer. Links come from data/site.config.ts.
+import { site } from "../../data/site.config";
+const links = (site as { footer?: { label: string; href: string }[] }).footer ?? [];
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  {links.length > 0 && (
+    <nav>
+      {links.map((l) => <a href={l.href}>{l.label}</a>)}
+    </nav>
+  )}
+  <p>© {year} {site.brand}</p>
+</footer>

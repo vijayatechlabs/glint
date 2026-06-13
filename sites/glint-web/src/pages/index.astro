@@ -1,0 +1,22 @@
+---
+import Base from "../layouts/Base.astro";
+import { site } from "../../data/site.config";
+import { pagePosts } from "../posts";
+const posts = await pagePosts();
+const description = site.seo.defaultDescription || `${site.brand} blog`;
+---
+
+<Base title={site.brand} description={description}>
+  <h1>{site.brand}</h1>
+  <ul>
+    {
+      posts.map((p) => (
+        <li>
+          <a href={`/blog/${p.id}/`}>{p.data.title}</a>
+          {p.data.draft && <em> — draft</em>}
+          <p>{p.data.summary}</p>
+        </li>
+      ))
+    }
+  </ul>
+</Base>

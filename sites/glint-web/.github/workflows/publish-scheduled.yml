@@ -1,0 +1,88 @@
+name: Publish Scheduled Drafts
+
+on:
+  schedule:
+    # Run daily at 12:00 UTC
+    - cron: '0 12 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Update draft statuses
+        run: |
+          # Node script to find markdown files with draft: true and publishedAt <= today, and set draft: false
+          node -e "
+          const fs = require('fs');
+          const path = require('path');
+          
+          function walk(dir) {
+            let results = [];
+            const list = fs.readdirSync(dir);
+            list.forEach(file => {
+              file = path.join(dir, file);
+              const stat = fs.statSync(file);
+              if (stat && stat.isDirectory()) { 
+                results = results.concat(walk(file));
+              } else if (file.endsWith('.md')) {
+                results.push(file);
+              }
+            });
+            return results;
+          }
+          
+          const contentDir = path.join(process.cwd(), 'content');
+          if (!fs.existsSync(contentDir)) process.exit(0);
+          
+          const files = walk(contentDir);
+          let changed = false;
+          const now = new Date();
+          
+          files.forEach(file => {
+            let content = fs.readFileSync(file, 'utf8');
+            if (content.startsWith('---')) {
+              const parts = content.split('---');
+              if (parts.length >= 3) {
+                const frontmatter = parts[1];
+                if (frontmatter.includes('draft: true')) {
+                  const dateMatch = frontmatter.match(/publishedAt:\s*([^\n\r]+)/);
+                  if (dateMatch) {
+                    const pubDate = new Date(dateMatch[1].trim());
+                    if (pubDate <= now) {
+                      const newFrontmatter = frontmatter.replace(/draft:\s*true/, 'draft: false');
+                      parts[1] = newFrontmatter;
+                      content = parts.join('---');
+                      fs.writeFileSync(file, content);
+                      console.log('Published:', file);
+                      changed = true;
+                    }
+                  }
+                }
+              }
+            }
+          });
+          
+          if (!changed) console.log('No scheduled drafts found to publish today.');
+          "
+          
+      - name: Commit and push changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add content/
+          # Only commit if there are changes
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: publish scheduled drafts"
+            git push
+          fi

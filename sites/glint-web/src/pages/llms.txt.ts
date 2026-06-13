@@ -1,0 +1,24 @@
+import type { APIContext } from "astro";
+import { site } from "../../data/site.config";
+import { publicPosts } from "../posts";
+
+// AEO: plain-text index of canonical URLs + raw markdown twins for AI crawlers.
+export async function GET(context: APIContext) {
+  const posts = await publicPosts();
+  const base = context.site!;
+  const lines = [
+    `# ${site.brand}`,
+    "",
+    `> ${site.seo.defaultDescription || `${site.brand} blog`}. Markdown twins linked per post.`,
+    "",
+    "## Posts",
+    ...posts.map((p) => {
+      const url = new URL(`/blog/${p.id}/`, base).href;
+      const raw = new URL(`/raw/blog/${p.id}.md`, base).href;
+      return `- [${p.data.title}](${url}): ${p.data.summary} (raw: ${raw})`;
+    }),
+  ];
+  return new Response(lines.join("\n"), {
+    headers: { "Content-Type": "text/plain; charset=utf-8" },
+  });
+}

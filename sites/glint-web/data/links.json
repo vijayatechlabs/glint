@@ -1,0 +1,14 @@
+{
+  "github": {
+    "label": "Glint on GitHub",
+    "href": "https://github.com/vijayatechlabs/glint"
+  },
+  "vijayatech": {
+    "label": "VijayaTech Labs",
+    "href": "https://vijayatech.in"
+  },
+  "llms-txt-spec": {
+    "label": "llms.txt specification",
+    "href": "https://llmstxt.org"
+  }
+}

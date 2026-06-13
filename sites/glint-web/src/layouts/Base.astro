@@ -1,0 +1,57 @@
+---
+import { site } from "../../data/site.config";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import "../styles/base.css";
+
+interface Props {
+  title: string;
+  description: string;
+  canonical?: string;
+  image?: string;
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown> | unknown[];
+}
+const { title, description, canonical, image, noindex, jsonLd } = Astro.props;
+const canon = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = image ? new URL(image, Astro.site).href : undefined;
+// Strip trailing slash so we can safely append asset paths.
+const siteBase = site.baseUrl.replace(/\/?$/, "");
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canon} />
+    {noindex && <meta name="robots" content="noindex" />}
+
+    <meta property="og:site_name" content={site.brand} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content={canon} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="alternate" type="application/rss+xml" title="RSS" href={new URL("/rss.xml", Astro.site).href} />
+
+    {/* Brand favicon (set `favicon` in site.config). siteBase keeps it correct
+        when mounted at a sub-path so it matches the host site's icon. */}
+    {site.favicon && <link rel="icon" href={`${siteBase}${site.favicon}`} />}
+
+    <!-- Brand tokens: absolute URLs so the blog loads them correctly when mounted
+         at a sub-path (e.g. domain.com/blog). Regenerate with `glint theme pull`. -->
+    <link rel="stylesheet" href={`${siteBase}/theme.css`} />
+    <link rel="stylesheet" href={`${siteBase}/custom.css`} />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+  </head>
+  <body>
+    <Header />
+    <main><slot /></main>
+    <Footer />
+  </body>
+</html>
