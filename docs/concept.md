@@ -260,7 +260,7 @@ This way, your team only needs to deeply know **Next + MDX + ISR**.
 Create a single **“VijayaTech Marketing Starter”** repo (Next.js 14) that you clone for:
 
 - naam.one
-- vijayatech.in
+- vijayatechlabs.com
 - vhpatp.org
 - Hey Jira marketing, BuyMyCar landing, Vishwakarma marketing, NAMM marketing
 - Client landing + blog sites

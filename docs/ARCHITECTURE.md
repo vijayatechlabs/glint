@@ -394,7 +394,7 @@ Hybrid, build-optimized:
 ```
 @vijayatech/glint  (engine, versioned package)
    ├── naam.one          (case-studies)        → standalone static site
-   ├── vijayatech.in     (blog)                → standalone static site
+   ├── vijayatechlabs.com     (blog)                → standalone static site
    ├── vhpatp.org        (events, news)        → standalone static site
    ├── buymycar.com      (blog)                → reverse-proxy /blog onto the app
    └── vishwakarma       (news + content API)  → site + mobile consume /api/*.json
