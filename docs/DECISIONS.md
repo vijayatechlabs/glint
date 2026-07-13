@@ -84,3 +84,53 @@ brand; generating it means it's always current and correctly pointed.
 
 **Decision 11 — Multi-tool pipeline plays & wrappers structure**
 The content pipeline plays (`docs/pipeline/*.md`) and orchestration documentation (`docs/CONTENT-PIPELINE.md`) are managed as static engine references (Bucket 1). Command wrappers for Claude Code and Antigravity are engine-generated (Bucket 2) so they update dynamically during sync. Customization of voice, strategy, and content is preserved in Bucket 3. The pipeline's automated execution utilizes local subscription state (no metered API keys) and enforces quality via the `glint doctor --strict` gate.
+
+---
+
+## 2026-07-13
+
+**Decision 12 — Markdown twins served as `text/plain` + `Content-Disposition: inline`, not `text/markdown`**
+`/raw/<collection>/<slug>.md` now serves `text/plain; charset=utf-8` with
+`Content-Disposition: inline`, replacing the previous `text/markdown; charset=utf-8`.
+`text/markdown` is the semantically "correct" IETF media type (RFC 7763), but browser
+and tool support for it is inconsistent — some clients offer it as a download instead
+of rendering inline. `text/plain` + explicit `inline` disposition renders reliably
+everywhere (browsers and AI agent fetchers alike) at the cost of the more precise
+MIME type. Revisit if `text/markdown` client support becomes reliably universal.
+
+**Decision 13 — Reference implementation: hand-rolled `sitemap.xml.ts` over `@astrojs/sitemap`**
+`examples/playground` now generates `sitemap.xml` itself
+(`src/pages/sitemap.xml.ts`) instead of via the `@astrojs/sitemap` integration, so
+`/raw/blog/<slug>.md` twins can be listed alongside their HTML counterparts at a
+distinct, lower `priority` (0.8 HTML / 0.4 twin) — the default integration only
+sees rendered Astro routes, not sibling API-route twins. `robots.txt` was updated
+to point at `/sitemap.xml` (was `/sitemap-index.xml`, the old integration's output
+name).
+**Scope note:** this change is scoped to the reference implementation
+(`examples/playground`) only, per the requesting task. The scaffold templates
+(`src/scaffold/theme*/src/pages/raw/blog/[slug].md.ts.tmpl`, the `astro.config.ts`
+generator in `src/cli/commands/new.ts`) still produce the old `text/markdown`
+header and rely on `@astrojs/sitemap` with no twin entries — new brand sites via
+`glint new` do **not** yet get this pattern. Propagating it to the scaffold/CLI so
+every brand gets it out of the box is tracked as follow-up work (the original ask
+in the engine feedback issue for markdown-twin sitemap support).
+
+**Decision 14 — Custom response headers need `public/_headers`; the route code alone doesn't serve them**
+Verified with `astro build && astro preview` + `curl -I`: this site has no
+`output: "server"` / adapter, so every endpoint (`.ts` routes included) is
+prerendered once at build time to a plain static file, and the `headers: {...}`
+passed to `new Response(...)` in the route handler is **discarded** — a generic
+static host infers `Content-Type` from the file extension instead (confirmed:
+`/raw/blog/hello-glint.md` served as `Content-Type: text/markdown` with no
+`Content-Disposition`, not the `text/plain` + `inline` the route code sets).
+Fix: `public/_headers` (Cloudflare Pages' and Netlify's static-header-rules
+convention — Astro copies `public/` verbatim into `dist/`), mapping
+`/raw/blog/*.md` and `/sitemap.xml` to the intended headers. This covers the
+project's documented default host (Cloudflare Pages) and Netlify. It does
+**not** cover Vercel (`vercel.json` `headers`) or a bare VPS/Nginx/Caddy origin
+(server-config, outside this repo) — those need their own equivalent, not done
+here. **This also could not be verified end-to-end locally**: `astro preview`
+serves `dist/` directly and has no knowledge of `_headers` (that convention is
+interpreted by Cloudflare Pages'/Netlify's edge layer on real deploys), so a
+local `curl -I` still shows the extension-inferred type even with the file
+present — confirming this requires an actual Cloudflare Pages/Netlify deploy.

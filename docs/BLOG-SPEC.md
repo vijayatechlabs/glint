@@ -75,8 +75,13 @@ For every published post + listing, the build emits — with **no manual work**:
 - **JSON-LD / schema.org:** `BlogPosting`/`Article`, `BreadcrumbList`,
   `Organization`, and `Person` (author).
 - **`llms.txt`** — index of canonical URLs + raw twin links for AI crawlers.
-- **Markdown twins** — `/raw/<collection>/<slug>.md` (the source, served clean).
-- **`sitemap.xml`** + **RSS/Atom feed** (`feed.xml`).
+- **Markdown twins** — `/raw/<collection>/<slug>.md` (the source, served clean as
+  `text/plain; charset=utf-8` + `Content-Disposition: inline`, so it renders
+  directly for browsers and AI agent fetchers instead of downloading — see
+  `docs/DECISIONS.md` 2026-07-13).
+- **`sitemap.xml`** (twin URLs included at a lower `priority` than their HTML
+  counterpart — see `examples/playground/src/pages/sitemap.xml.ts`) +
+  **RSS/Atom feed** (`feed.xml`).
 - **Canonical URLs**, OpenGraph + Twitter meta, and **auto-generated per-post OG
   images** (satori / astro-og-canvas).
 - **JSON content API** — `/api/<collection>.json` + `/api/<collection>/<slug>.json`

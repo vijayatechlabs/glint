@@ -1,0 +1,13 @@
+# Cloudflare Pages / Netlify static-header rules.
+# Astro prerenders API routes to plain static files, so the Content-Type /
+# Content-Disposition set in the route handler (src/pages/raw/blog/[slug].md.ts,
+# src/pages/sitemap.xml.ts) only reaches the browser if the host is told to
+# serve these paths with those headers explicitly — see docs/DECISIONS.md
+# 2026-07-13 (Decision 13).
+
+/raw/blog/*.md
+  Content-Type: text/plain; charset=utf-8
+  Content-Disposition: inline
+
+/sitemap.xml
+  Content-Type: application/xml; charset=utf-8
