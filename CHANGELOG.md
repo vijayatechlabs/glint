@@ -8,6 +8,8 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-07-17
+
 ### Added
 - **IndexNow**: post-deploy URL notify (add/update/delete) via `glint indexnow`
   with git SHA delta, twin expansion, host filter, HTTP gate (`redirect: manual`),
