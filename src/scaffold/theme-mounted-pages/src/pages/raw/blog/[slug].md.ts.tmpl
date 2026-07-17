@@ -1,15 +1,23 @@
 import type { APIContext } from "astro";
 import { publicPosts } from "../../../posts";
+import { site } from "../../../../data/site.config";
 
-// AEO: markdown twins — serve the raw source body at /raw/blog/<slug>.md.
+// AEO: markdown twins — raw body at /raw/blog/<slug>.md (under site base)
 export async function getStaticPaths() {
   const posts = await publicPosts();
   return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
 }
 
 export async function GET({ props }: APIContext) {
-  const { post } = props as { post: { body: string } };
+  const { post } = props as { post: { id: string; body: string } };
+  const base = site.baseUrl.replace(/\/$/, "");
+  const htmlUrl = `${base}/${post.id}/`;
+
   return new Response(post.body, {
-    headers: { "Content-Type": "text/markdown; charset=utf-8" },
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      "Content-Disposition": "inline",
+      Link: `<${htmlUrl}>; rel="canonical"`,
+    },
   });
 }

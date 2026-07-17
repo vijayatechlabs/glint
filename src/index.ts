@@ -8,3 +8,4 @@
 export * from "./content/schema.js";
 export { glintSitemap } from "./integration/sitemap.js";
 export type { GlintSitemapOptions } from "./integration/sitemap.js";
+export { glintIndexNow } from "./integration/indexnow.js";

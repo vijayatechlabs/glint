@@ -97,11 +97,11 @@ const astroConfig = (siteUrl: string, mount?: string) => {
   const hasBase = Boolean(mount && mount !== "/");
   const baseLine = hasBase ? `\n  base: ${JSON.stringify(mount)},` : "";
   const imports = hasBase
-    ? `import sitemap from "@astrojs/sitemap";\nimport { glintSitemap } from "@vijayatech/glint";`
-    : `import sitemap from "@astrojs/sitemap";`;
+    ? `import sitemap from "@astrojs/sitemap";\nimport { glintSitemap, glintIndexNow } from "@vijayatech/glint";`
+    : `import sitemap from "@astrojs/sitemap";\nimport { glintIndexNow } from "@vijayatech/glint";`;
   const integrations = hasBase
-    ? `[sitemap(), glintSitemap({ sitemapName: ${JSON.stringify(mountToSitemapName(mount!))} })]`
-    : `[sitemap()]`;
+    ? `[sitemap(), glintSitemap({ sitemapName: ${JSON.stringify(mountToSitemapName(mount!))} }), glintIndexNow()]`
+    : `[sitemap(), glintIndexNow()]`;
   return `import { defineConfig } from "astro/config";
 ${imports}
 
@@ -164,6 +164,25 @@ export const site = {
     titleTemplate: "%s — ${brand}",
     defaultDescription: "",
     ogImage: "/media/og-default.png",
+  },
+
+  // ── Measurement & indexing ───────────────────────────────────────────────
+  // Fill these before first publish. glint doctor warns when they're empty.
+  analytics: {
+    ga4: "",               // "G-XXXXXXXXXX" — Google Analytics 4 Measurement ID
+    cloudflare: "",        // Cloudflare Web Analytics token (optional, privacy-first alt)
+  },
+  verification: {
+    google: "",            // Google Search Console meta-tag token (or verify via DNS)
+    bing: "",              // Bing Webmaster Tools meta-tag token
+  },
+  // IndexNow: notify search engines after deploy (receipt only — not crawl/rank).
+  // glintIndexNow writes the key file at build; post-deploy: glint indexnow --since-sha <cursor>
+  // 1. Generate a key: 8-128 chars A-Za-z0-9-hyphen, e.g. crypto.randomUUID().
+  // 2. keyPath "root" = domain root key file (preferred); "base" = under mount.
+  indexNow: {
+    key: "",
+    keyPath: "root",
   },
 } as const;
 `;

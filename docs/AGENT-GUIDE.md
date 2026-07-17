@@ -53,7 +53,9 @@ right plan. The full state-aware flow is in **`docs/INIT.md`**.
 7. REVIEW (human gate)    → open a PR; human approves/edits
 8. PUBLISH                → flip draft:false on approved posts; merge
 9. BUILD + DEPLOY         → CI builds static → CDN (e.g. Cloudflare Pages)
-10. REDIRECTS + INDEXNOW  → apply redirects.json; ping IndexNow on publish
+ 10. REDIRECTS + INDEXNOW  → apply redirects; **after deploy is live** run
+      `glint indexnow --since-sha <durable-cursor> --sha <deploy-sha>`
+      (200/202 = receipt only — not crawl/ChatGPT guarantee)
 ```
 
 Steps 5–8 are the loop you repeat per post or batch.
@@ -67,8 +69,10 @@ Steps 5–8 are the loop you repeat per post or batch.
 | `glint status [--dir .]` | Content board — every post by status (draft/scheduled/published) |
 | `glint import wordpress --wxr <f> --out <repo>` | WXR → Markdown drafts + media + `redirects.json` + audit |
 | `glint doctor [--dir .]` | Validate schema, scaffolding leaks, taxonomy registry, dup slugs, broken internal links (fails on ERROR) |
-| `glint build [--dir .]` | Astro static build → HTML + JSON-LD + sitemap + RSS + llms.txt + /raw twins + JSON API (drafts excluded) |
+| `glint build [--dir .]` | Astro static build → HTML + JSON-LD + sitemap + RSS + llms.txt + /raw twins + JSON API (drafts excluded). IndexNow key file via `glintIndexNow()` — **no** HTTP ping at build. |
 | `glint preview [--dir .]` | Astro dev server with drafts visible (`noindex` banner) |
+| `glint indexnow --since-sha <prev> [--sha HEAD]` | Post-deploy IndexNow submit from git content delta (+ twins). Requires durable cursor. |
+| `glint migrate indexnow` | One-time: register `glintIndexNow`, scaffold GH workflow, twin header hints |
 
 Run in dev via `pnpm glint <cmd>` from the engine, or the installed `glint` bin.
 

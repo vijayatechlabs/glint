@@ -5,6 +5,10 @@
  * dir. `build` produces the static site + full AEO surface (HTML, JSON-LD,
  * sitemap, RSS, llms.txt, /raw twins, JSON API) honoring the draft rules.
  * `preview` runs the dev server with drafts visible (BLOG-SPEC §1).
+ *
+ * IndexNow: key file + twin sitemap injection run via `glintIndexNow()` during
+ * `astro build`. HTTP submit is **not** done here — run `glint indexnow` after
+ * deploy with a durable --since-sha cursor.
  */
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";

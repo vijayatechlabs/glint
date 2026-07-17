@@ -13,6 +13,7 @@ const { post } = Astro.props;
 const { Content } = await render(post);
 const base = import.meta.env.BASE_URL;
 const url = new URL(`${base}${post.id}/`, Astro.site).href;
+const markdownAlternate = new URL(`${base}raw/blog/${post.id}.md`, Astro.site).href;
 
 const words = post.body?.trim().split(/\s+/).length ?? 0;
 const readingTime = Math.max(1, Math.round(words / 200));
@@ -43,6 +44,7 @@ const breadcrumb = {
   title={post.data.title}
   description={post.data.summary}
   canonical={url}
+  markdownAlternate={markdownAlternate}
   image={post.data.cover?.src}
   noindex={post.data.draft}
   jsonLd={[blogPosting, breadcrumb]}

@@ -84,3 +84,13 @@ brand; generating it means it's always current and correctly pointed.
 
 **Decision 11 — Multi-tool pipeline plays & wrappers structure**
 The content pipeline plays (`docs/pipeline/*.md`) and orchestration documentation (`docs/CONTENT-PIPELINE.md`) are managed as static engine references (Bucket 1). Command wrappers for Claude Code and Antigravity are engine-generated (Bucket 2) so they update dynamically during sync. Customization of voice, strategy, and content is preserved in Bucket 3. The pipeline's automated execution utilizes local subscription state (no metered API keys) and enforces quality via the `glint doctor --strict` gate.
+
+---
+
+## 2026-07-17
+
+**Decision 12 — IndexNow post-deployment protocol model**
+IndexNow URL submission is split into two phases: (1) build-time generation (the `glintIndexNow` Astro integration writes the verification `<key>.txt` file and injects `/raw` twin URLs into sitemaps), and (2) post-deployment ping (`glint indexnow` command). 
+- **Why**: Triggering the HTTP submit requests during Astro build-time causes search engines to immediately query the site for the verification key file. Since the site has not yet been deployed or uploaded to the CDN/VPS (e.g. Cloudflare Pages or Coolify), they encounter a 404 error and reject the submission. Moving the HTTP submit to a post-deploy step prevents this race condition.
+- **Durable Cursor**: The post-deploy command compares the current commit SHA with a durable commit cursor (`--since-sha`) stored in the deploy environment to submit only added, modified, or deleted URLs, preventing spamming search engines with historical sitemap pings.
+

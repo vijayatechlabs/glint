@@ -21,7 +21,8 @@
     "build": "tsup",
     "prepare": "tsup",
     "glint": "tsx src/cli/index.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/lib/indexnow.test.ts"
   },
   "keywords": ["astro", "static-site", "publishing", "aeo", "seo", "agent", "git-native"],
   "dependencies": {

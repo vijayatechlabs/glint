@@ -8,11 +8,13 @@ interface Props {
   title: string;
   description: string;
   canonical?: string;
+  /** Absolute URL of markdown twin when present (AEO §8.4.1). */
+  markdownAlternate?: string;
   image?: string;
   noindex?: boolean;
   jsonLd?: Record<string, unknown> | unknown[];
 }
-const { title, description, canonical, image, noindex, jsonLd } = Astro.props;
+const { title, description, canonical, markdownAlternate, image, noindex, jsonLd } = Astro.props;
 const canon = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = image ? new URL(image, Astro.site).href : undefined;
 // Strip trailing slash so we can safely append asset paths.
@@ -38,6 +40,9 @@ const siteBase = site.baseUrl.replace(/\/?$/, "");
     <meta name="twitter:card" content="summary_large_image" />
 
     <link rel="alternate" type="application/rss+xml" title="RSS" href={new URL("/rss.xml", Astro.site).href} />
+    {markdownAlternate && (
+      <link rel="alternate" type="text/markdown" href={markdownAlternate} />
+    )}
 
     {/* Brand favicon (set `favicon` in site.config). siteBase keeps it correct
         when mounted at a sub-path so it matches the host site's icon. */}
@@ -48,6 +53,37 @@ const siteBase = site.baseUrl.replace(/\/?$/, "");
     <link rel="stylesheet" href={`${siteBase}/theme.css`} />
     <link rel="stylesheet" href={`${siteBase}/custom.css`} />
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+
+    {/* Google Search Console + Bing Webmaster verification meta tags.
+        Safe to emit on all pages (including dev) — they're inert meta tags. */}
+    {site.verification?.google && <meta name="google-site-verification" content={site.verification.google} />}
+    {site.verification?.bing && <meta name="msvalidate.01" content={site.verification.bing} />}
+
+    {/* Google Analytics 4 — PROD only, and never on noindex/draft pages so
+        preview deploys don't pollute production data. */}
+    {import.meta.env.PROD && !noindex && site.analytics?.ga4 && (
+      <script async src={`https://www.googletagmanager.com/gtag/js?id=${site.analytics.ga4}`}></script>
+    )}
+    {import.meta.env.PROD && !noindex && site.analytics?.ga4 && (
+      <script define:vars={{ gaId: site.analytics.ga4 }}>
+        window.dataLayer = window.dataLayer || [];
+        // GA4 expects the Arguments object (not a rest array).
+        function gtag() {
+          dataLayer.push(arguments);
+        }
+        gtag("js", new Date());
+        gtag("config", gaId);
+      </script>
+    )}
+
+    {/* Cloudflare Web Analytics — PROD only, skip noindex/draft previews. */}
+    {import.meta.env.PROD && !noindex && site.analytics?.cloudflare && (
+      <script
+        defer
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon={JSON.stringify({ token: site.analytics.cloudflare })}
+      ></script>
+    )}
   </head>
   <body>
     <Header />

@@ -1,5 +1,6 @@
 import type { APIContext } from "astro";
 import { publicPosts } from "../../../posts";
+import { site } from "../../../../data/site.config";
 
 // AEO: markdown twins — serve the raw source body at /raw/blog/<slug>.md.
 export async function getStaticPaths() {
@@ -8,8 +9,19 @@ export async function getStaticPaths() {
 }
 
 export async function GET({ props }: APIContext) {
-  const { post } = props as { post: { body: string } };
+  const { post } = props as { post: { id: string; body: string } };
+  const base = site.baseUrl.replace(/\/$/, "");
+  const mount = "mount" in site ? String((site as { mount?: string }).mount ?? "") : "";
+  const htmlUrl =
+    mount && mount !== "/"
+      ? `${base}/${post.id}/`
+      : `${base}/blog/${post.id}/`;
+
   return new Response(post.body, {
-    headers: { "Content-Type": "text/markdown; charset=utf-8" },
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      "Content-Disposition": "inline",
+      Link: `<${htmlUrl}>; rel="canonical"`,
+    },
   });
 }
