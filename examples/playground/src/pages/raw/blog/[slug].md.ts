@@ -4,6 +4,7 @@ import { publicPosts } from "../../../posts";
 import { site } from "../../../../data/site.config";
 
 // AEO: markdown twins at /raw/blog/<slug>.md (headers via markdownTwinResponse).
+// On static hosts, public/_headers also sets Content-Type for CDN deploys.
 // Content negotiation (Accept / bot UA) is edge-only — see docs/AEO.md.
 export async function getStaticPaths() {
   const posts = await publicPosts();

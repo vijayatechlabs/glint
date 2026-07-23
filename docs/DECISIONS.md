@@ -90,10 +90,9 @@ The content pipeline plays (`docs/pipeline/*.md`) and orchestration documentatio
 ## 2026-07-17
 
 **Decision 12 — IndexNow post-deployment protocol model**
-IndexNow URL submission is split into two phases: (1) build-time generation (the `glintIndexNow` Astro integration writes the verification `<key>.txt` file and injects `/raw` twin URLs into sitemaps), and (2) post-deployment ping (`glint indexnow` command). 
+IndexNow URL submission is split into two phases: (1) build-time generation (the `glintIndexNow` Astro integration writes the verification `<key>.txt` file and injects `/raw` twin URLs into sitemaps), and (2) post-deployment ping (`glint indexnow` command).
 - **Why**: Triggering the HTTP submit requests during Astro build-time causes search engines to immediately query the site for the verification key file. Since the site has not yet been deployed or uploaded to the CDN/VPS (e.g. Cloudflare Pages or Coolify), they encounter a 404 error and reject the submission. Moving the HTTP submit to a post-deploy step prevents this race condition.
 - **Durable Cursor**: The post-deploy command compares the current commit SHA with a durable commit cursor (`--since-sha`) stored in the deploy environment to submit only added, modified, or deleted URLs, preventing spamming search engines with historical sitemap pings.
-
 
 ---
 
@@ -108,3 +107,18 @@ IndexNow URL submission is split into two phases: (1) build-time generation (the
 - **Agent protocol:** `docs/AEO.md` (synced to brands). Agents implement static AEO freely; **must ask humans before** deploying edge workers or changing CDN routes.
 - **Origin path stays** `/raw/blog/<slug>.md`; optional public `/blog/<slug>.md` is brand edge mapping only (plan: `.ai/docs/plans/aeo-edge-worker.md`).
 - **Docs policy:** do not name or promote external AEO products in user/agent docs; describe Glint’s own behaviour and opt-in edge notes only.
+- **Twin Content-Type:** `text/markdown; charset=utf-8` (with AEO headers), not `text/plain`. Supersedes earlier playground experiment that preferred plain text for inline browser rendering.
+
+**Decision 14 — Playground hand-rolled sitemap lists markdown twins**
+
+`examples/playground` generates `sitemap.xml` via `src/pages/sitemap.xml.ts` so
+`/raw/blog/<slug>.md` twins appear next to HTML posts (lower priority). Engine
+scaffolds still use `@astrojs/sitemap` + optional IndexNow twin injection —
+propagating hand-rolled twin listing to all brands is follow-up.
+
+**Decision 15 — Static twin headers may need `public/_headers` (CF Pages / Netlify)**
+
+Prerendered static files often ignore `Response` headers from API routes; hosts
+infer type from extension. Playground ships `public/_headers` for
+`/raw/blog/*.md` AEO headers and `/sitemap.xml` content-type on Cloudflare Pages
+and Netlify. Other hosts need their own header config.

@@ -82,13 +82,17 @@ For every published post + listing, the build emits — with **no manual work**:
   (`text/markdown; charset=utf-8`, `X-Markdown-Tokens`, `X-Robots-Tag: noindex`,
   `Vary`, `X-AEO-Version`, `nosniff`, canonical `Link`) via
   `markdownTwinResponse` from `@vijayatech/glint`. See **`docs/AEO.md`**.
+  Static hosts may need `public/_headers` (or host config) so those headers stick.
 - **Not automatic (edge, human-approved):** HTTP content negotiation
   (`Accept` / bot UA), optional public `.md` URL rewrite, HTML `Vary` / HTTP
   `Link` — opt-in per brand; agents must not deploy without approval
   (`docs/AEO.md` §3–4).
-- **`sitemap.xml`** + **RSS/Atom feed** (`feed.xml`).
+- **`sitemap.xml`** + **RSS/Atom feed** — HTML posts and (where implemented)
+  twin URLs at lower priority; playground hand-rolls twins into sitemap
+  (`examples/playground/src/pages/sitemap.xml.ts`). Engine default uses
+  `@astrojs/sitemap` + optional IndexNow twin injection.
 - **Canonical URLs**, OpenGraph + Twitter meta, and **auto-generated per-post OG
-  images** (satori / astro-og-canvas).
+  images**.
 - **JSON content API** — `/api/<collection>.json` + `/api/<collection>/<slug>.json`
   for apps/mobile consumers.
 - Per-post: **breadcrumbs, reading time, table of contents, related posts**.

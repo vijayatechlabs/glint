@@ -10,8 +10,7 @@
   "dependencies": {
     "@vijayatech/glint": "link:../../",
     "astro": "^6.0.0",
-    "@astrojs/rss": "^4.0.11",
-    "@astrojs/sitemap": "^3.3.0"
+    "@astrojs/rss": "^4.0.11"
   },
   "devDependencies": {
     "pagefind": "^1.1.0"
