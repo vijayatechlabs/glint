@@ -1,33 +1,43 @@
 # Glint
 
-> The lightning publishing engine for the AI era.
-> **Git-native · static-output · agent-first · edge-delivered · AEO-native.**
+> Open-source, **git-native** publishing for the AI era.
+> **Static-output · agent-first · IDE-friendly · SEO/AEO-native.**
 >
 > A **fluid SEO & AEO content framework**: write Markdown to a fixed contract; the
 > build auto-emits structured data, markdown twins, `llms.txt`, feeds, internal
 > links, and search — no per-post SEO busywork.
 
-Glint is a reusable publishing engine for VijayaTech's own and client brands.
+**Glint** helps **developers, freelancers, and agencies** publish rich content and
+manage blogs **in context** with the website, app, or product they already ship —
+without leaving the IDE, without a separate CMS runtime, and without abandoning
+git.
+
 Content is **Markdown + JSON in git**; an **AI agent authors** from inside the
-repo; **humans approve by reviewing a PR**; output is **pure static HTML + a
-JSON/MD content API**. WordPress-grade media and reuse, none of the runtime.
+repo (with brand, product, and prior-post context); **humans approve by reviewing
+a PR**; output is **pure static HTML + a JSON/MD content API**. WordPress-grade
+media and reuse, none of the runtime.
 
 It is deliberately **not a CMS**. It is a thin content contract + agent
 publishing loop + static build, assembled on Astro and deployable to any host.
 
 ## Who Glint is for (and not)
 
-**For:** small teams and solo founders who want fast, SEO/AEO-strong blogs that
-**blend into their existing brand/app**, published by AI agents with light human
-review. Speed, simplicity, agent-first.
+**For:**
 
-**Not for:** heavy per-site customization, page builders, theme marketplaces, or
-publishing-house workflows. Glint ships **one** opinionated, reading-optimized
-layout and matches your brand via **tokens** — not custom themes.
+- **Developers** who want a blog or content surface next to the app they build
+- **Freelancers** who deliver content sites without babysitting a hosted CMS
+- **Agencies** standardizing many brand blogs on one engine and one git workflow
+- Small teams who want SEO/AEO-strong, brand-matched blogs published by agents
+  with light human review
 
-> Design rule: the blog must feel like part of your app — same colors, type, and a
-> simple matching header/footer — **never a separate product** — while staying
-> fully static for SEO/AEO.
+**Not for:** heavy per-site page builders, theme marketplaces, or
+publishing-house workflows that need a non-technical admin UI first. Glint ships
+**one** opinionated, reading-optimized layout and matches your brand via
+**tokens** — not custom themes.
+
+> Design rule: the blog must feel like part of your product — same colors, type,
+> and a simple matching header/footer — **never a separate product** — while
+> staying fully static for SEO/AEO.
 
 ## Status
 
@@ -37,8 +47,9 @@ import · build · preview · feedback · theme`.
 - **Onboard any brand in one command** — `glint onboard --app <repo> --apply`
   detects brand/tokens/host and scaffolds a buildable, brand-matched blog.
 - **Static + AEO** — JSON-LD, sitemap, RSS, `robots.txt`, `llms.txt`, `/raw`
-  markdown twins, JSON API; category/tag **archives**, **related posts**, and
-  **Pagefind search**; drafts excluded from production.
+  markdown twins (AEO headers), JSON API; category/tag **archives**, **related
+  posts**, and **Pagefind search**; drafts excluded from production. See
+  [`docs/AEO.md`](docs/AEO.md).
 - **Brand blend** — token-styled static header/footer; `glint theme pull` pulls an
   app's Tailwind/CSS tokens into `theme.css`; `custom.css` escape hatch.
 - **Mount-correct** — assets use absolute URLs from `site.baseUrl` so the blog
@@ -74,6 +85,8 @@ a separate repo, onboarded from the engine.
 ## Docs
 
 - [`docs/GETTING-STARTED.md`](docs/GETTING-STARTED.md) — **start here** — how to begin in Claude / Gemini-Antigravity / Codex, for any project state.
+- [`docs/AEO.md`](docs/AEO.md) — static AEO surface vs optional edge (human approval).
+- [`docs/UPGRADE.md`](docs/UPGRADE.md) — brand upgrade checklist (humans + agents).
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — layers, contract, roadmap, decisions.
 - [`docs/DECISIONS.md`](docs/DECISIONS.md) — append-only ADR log (why, not what).
 - [`docs/AGENT-GUIDE.md`](docs/AGENT-GUIDE.md) — the agent-agnostic operating contract.

@@ -1,0 +1,47 @@
+import type { APIContext } from "astro";
+import { publicPosts, relatedTo } from "../../posts";
+
+// Per-post structured JSON — apps, mobile, and AI agents consume individual posts.
+export async function getStaticPaths() {
+  const posts = await publicPosts();
+  return posts.map((post: any) => ({ params: { slug: post.id }, props: { post, all: posts } }));
+}
+
+export async function GET(context: APIContext) {
+  const { post, all } = context.props as { post: any; all: any[] };
+  const site = context.site;
+  const base = import.meta.env.BASE_URL;
+  const url = new URL(`${base}${post.id}/`, site).href;
+  const related = relatedTo(post, all).map((p: any) => ({
+    slug: p.id,
+    title: p.data.title,
+    url: new URL(`${base}${p.id}/`, site).href,
+  }));
+
+  const words = post.body?.trim().split(/\s+/).length ?? 0;
+  const readingTime = Math.max(1, Math.round(words / 200));
+
+  const data = {
+    slug: post.id,
+    url,
+    title: post.data.title,
+    summary: post.data.summary,
+    publishedAt: post.data.publishedAt.toISOString(),
+    updatedAt: post.data.updatedAt?.toISOString() ?? null,
+    author: post.data.author
+      ? { name: post.data.author }
+      : null,
+    category: post.data.category ?? null,
+    tags: post.data.tags ?? [],
+    cover: post.data.cover
+      ? { src: new URL(post.data.cover.src, site).href, alt: post.data.cover.alt }
+      : null,
+    body: post.body ?? "",
+    readingTime,
+    related,
+  };
+
+  return new Response(JSON.stringify(data, null, 2), {
+    headers: { "Content-Type": "application/json" },
+  });
+}

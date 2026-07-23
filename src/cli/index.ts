@@ -13,6 +13,10 @@ import { runImport } from "./commands/import-wordpress.js";
 import { runDoctor } from "./commands/doctor.js";
 import { runBuild, runPreview } from "./commands/build.js";
 import { runSync } from "./commands/sync.js";
+import { runIndexNow } from "./commands/indexnow.js";
+import { runIndex } from "./commands/index.js";
+import { runSetup } from "./commands/setup.js";
+import { runMigrate } from "./commands/migrate.js";
 
 const COMMANDS: Record<string, string> = {
   onboard: "Detect brand/tokens/host from an app + draft the site — `--app <repo> --apply`",
@@ -26,6 +30,10 @@ const COMMANDS: Record<string, string> = {
   doctor: "Validate schema, taxonomy, scaffolding leaks, internal links (the gate)",
   import: "Import content into Glint — e.g. `glint import wordpress --wxr <f>`",
   sync: "Pull latest engine templates into this site — safe, never touches brand data",
+  indexnow: "Post-deploy IndexNow submit (git delta; requires --since-sha)",
+  index: "Post-deploy Google Indexing API submit (complements indexnow)",
+  setup: "Guided setup — e.g. `glint setup indexing`",
+  migrate: "One-time site migrations — e.g. `glint migrate indexnow`",
 };
 
 const handlers: Record<string, (args: string[]) => Promise<void>> = {
@@ -40,6 +48,10 @@ const handlers: Record<string, (args: string[]) => Promise<void>> = {
   build: runBuild,
   preview: runPreview,
   sync: runSync,
+  indexnow: runIndexNow,
+  index: runIndex,
+  setup: runSetup,
+  migrate: runMigrate,
 };
 
 function help(): void {

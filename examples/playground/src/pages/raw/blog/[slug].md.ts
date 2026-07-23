@@ -1,20 +1,24 @@
 import type { APIContext } from "astro";
+import { markdownTwinResponse } from "@vijayatech/glint";
 import { publicPosts } from "../../../posts";
+import { site } from "../../../../data/site.config";
 
-// AEO: markdown twins — serve the raw source body at /raw/blog/<slug>.md as
-// plain text, inline, so both browsers and AI agent fetchers render/read it
-// directly instead of triggering a download prompt for an unrecognized type.
+// AEO: markdown twins at /raw/blog/<slug>.md (headers via markdownTwinResponse).
+// On static hosts, public/_headers also sets Content-Type for CDN deploys.
+// Content negotiation (Accept / bot UA) is edge-only — see docs/AEO.md.
 export async function getStaticPaths() {
   const posts = await publicPosts();
   return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
 }
 
 export async function GET({ props }: APIContext) {
-  const { post } = props as { post: { body: string } };
-  return new Response(post.body, {
-    headers: {
-      "Content-Type": "text/plain; charset=utf-8",
-      "Content-Disposition": "inline",
-    },
-  });
+  const { post } = props as { post: { id: string; body: string } };
+  const base = site.baseUrl.replace(/\/$/, "");
+  const mount = "mount" in site ? String((site as { mount?: string }).mount ?? "") : "";
+  const htmlUrl =
+    mount && mount !== "/"
+      ? `${base}/${post.id}/`
+      : `${base}/blog/${post.id}/`;
+
+  return markdownTwinResponse(post.body ?? "", { htmlUrl });
 }

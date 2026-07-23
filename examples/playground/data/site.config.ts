@@ -15,4 +15,17 @@ export const site = {
     defaultDescription: "",
     ogImage: "/media/og-default.png",
   },
+  analytics: {
+    ga4: "",
+    cloudflare: "",
+  },
+  verification: {
+    google: "",
+    bing: "",
+  },
+  indexNow: {
+    key: "",
+    keyPath: "root",
+  },
+  aiCrawlers: "all" as "all" | "retrieval-only" | "none",
 } as const;

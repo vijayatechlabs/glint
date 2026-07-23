@@ -6,10 +6,12 @@ import { publicPosts } from "../posts";
 export async function GET(context: APIContext) {
   const posts = await publicPosts();
   const base = context.site!;
+  const fullUrl = new URL("/llms-full.txt", base).href;
   const lines = [
     `# ${site.brand}`,
     "",
     `> ${site.seo.defaultDescription || `${site.brand} blog`}. Markdown twins linked per post.`,
+    `> Full content: ${fullUrl}`,
     "",
     "## Posts",
     ...posts.map((p) => {

@@ -97,17 +97,21 @@ const astroConfig = (siteUrl: string, mount?: string) => {
   const hasBase = Boolean(mount && mount !== "/");
   const baseLine = hasBase ? `\n  base: ${JSON.stringify(mount)},` : "";
   const imports = hasBase
-    ? `import sitemap from "@astrojs/sitemap";\nimport { glintSitemap } from "@vijayatech/glint";`
-    : `import sitemap from "@astrojs/sitemap";`;
+    ? `import sitemap from "@astrojs/sitemap";\nimport { glintSitemap, glintSitemapLastmod, glintIndexNow, glintOgImage, remarkResolveLinks, rehypeHeadingIds } from "@vijayatech/glint";`
+    : `import sitemap from "@astrojs/sitemap";\nimport { glintSitemapLastmod, glintIndexNow, glintOgImage, remarkResolveLinks, rehypeHeadingIds } from "@vijayatech/glint";`;
   const integrations = hasBase
-    ? `[sitemap(), glintSitemap({ sitemapName: ${JSON.stringify(mountToSitemapName(mount!))} })]`
-    : `[sitemap()]`;
+    ? `[sitemap(), glintSitemap({ sitemapName: ${JSON.stringify(mountToSitemapName(mount!))} }), glintSitemapLastmod(), glintIndexNow(), glintOgImage()]`
+    : `[sitemap(), glintSitemapLastmod(), glintIndexNow(), glintOgImage()]`;
   return `import { defineConfig } from "astro/config";
 ${imports}
 
 export default defineConfig({
   site: ${JSON.stringify(siteUrl)},${baseLine}
   integrations: ${integrations},
+  markdown: {
+    remarkPlugins: [remarkResolveLinks(import.meta.dirname)],
+    rehypePlugins: [rehypeHeadingIds()],
+  },
 });
 `;
 };
@@ -165,6 +169,30 @@ export const site = {
     defaultDescription: "",
     ogImage: "/media/og-default.png",
   },
+
+  // ── Measurement & indexing ───────────────────────────────────────────────
+  // Fill these before first publish. glint doctor warns when they're empty.
+  analytics: {
+    ga4: "",               // "G-XXXXXXXXXX" — Google Analytics 4 Measurement ID
+    cloudflare: "",        // Cloudflare Web Analytics token (optional, privacy-first alt)
+  },
+  verification: {
+    google: "",            // Google Search Console meta-tag token (or verify via DNS)
+    bing: "",              // Bing Webmaster Tools meta-tag token
+  },
+  // IndexNow: notify search engines after deploy (receipt only — not crawl/rank).
+  // glintIndexNow writes the key file at build; post-deploy: glint indexnow --since-sha <cursor>
+  // 1. Generate a key: 8-128 chars A-Za-z0-9-hyphen, e.g. crypto.randomUUID().
+  // 2. keyPath "root" = domain root key file (preferred); "base" = under mount.
+  indexNow: {
+    key: "",
+    keyPath: "root",
+  },
+  // ── AI crawler policy ──────────────────────────────────────────────────
+  // Controls robots.txt directives for AI bots.
+  // "all" = allow all bots (default); "retrieval-only" = block training, allow retrieval;
+  // "none" = block all AI-specific bots. See .ai/docs/plans/seo-aeo-uplift.md §2.7
+  aiCrawlers: "" as "" | "all" | "retrieval-only" | "none",  // set explicitly — doctor WARNs when empty
 } as const;
 `;
 
@@ -176,8 +204,10 @@ Cursor). Read this before doing anything.
 
 ## What this repo is
 The ${collections.join(" / ")} for **${brand}**, built on **Glint**
-(\`@vijayatech/glint\`). Content is Markdown; you author it; a human approves via PR;
-it builds to static HTML at **${domain}${mount || ""}**. Not WordPress, not a CMS.
+(\`@vijayatech/glint\`) — open-source, git-native publishing. Content is Markdown in
+this repo (product/site context stays nearby); you author in the IDE; a human
+approves via PR; it builds to static HTML at **${domain}${mount || ""}**.
+Not WordPress, not a hosted CMS.
 
 ## Always read first
 1. \`data/content-strategy.md\` — what to write & why (pillars, ICP, cadence, rules).
@@ -199,6 +229,8 @@ it builds to static HTML at **${domain}${mount || ""}**. Not WordPress, not a CM
 - **No duplicate posts:** scan \`content/\` + \`data/content-plan.md\`; sharpen the angle
   instead of repeating an existing post.
 - **Review gate:** self-check against \`docs/blog-review-checklist.md\` before the PR.
+- **AEO is mostly compiled:** markdown twins + headers ship from \`glint build\` (see \`docs/AEO.md\`). Do not hand-write JSON-LD or twin headers into post bodies.
+- **Edge / CDN changes need a human:** Accept negotiation, bot-UA routing, and Workers/middleware are **opt-in per project**. Agents MUST NOT deploy edge workers, change CDN routes, or paste platform edge code without **explicit human approval**. Present the plan from \`docs/AEO.md\` and wait.
 
 ## Frontmatter contract (\`content/<collection>/<slug>.md\`)
 \`\`\`yaml

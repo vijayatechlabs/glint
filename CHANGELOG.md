@@ -9,10 +9,56 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- **AEO twins:** `markdownTwinHeaders` / `markdownTwinResponse` on
+  `@vijayatech/glint` — origin `/raw/blog/<slug>.md` serves
+  `text/markdown; charset=utf-8` plus `X-Markdown-Tokens`, `X-Robots-Tag`,
+  `Vary`, `X-AEO-Version`, `nosniff`, and canonical `Link`. Wired into scaffold
+  templates + playground.
+- **docs/AEO.md** (engine + brand sync via Bucket 1): what the framework ships vs
+  opt-in edge negotiation; **agents must get human approval** before Workers /
+  middleware.
+- **docs/UPGRADE.md** (synced): short brand upgrade checklist for humans + agents
+  after each engine release.
+- **doctor:** WARN when twin route missing AEO headers or still on `text/plain`.
+- **SEO/AEO uplift completion:** TOC uses shared `extractHeadings` (IDs match
+  `rehypeHeadingIds`); RSS `content` is basic HTML via `markdownToHtmlBasic`;
+  sitemap lastmod helpers (`matchLastmod`) cover mount paths; Person/article
+  author resolved via `team.json`; `llms-full` alternate link in Base; unit
+  tests for headings, links casing, lastmod.
+
+### Changed
+- **migrate indexnow:** no longer rewrites twin `Content-Type` to `text/plain`;
+  upgrades plain→markdown when possible and points brands at
+  `markdownTwinResponse`.
+- **AGENTS.md hard rules:** AEO compiled + edge/CDN human gate.
+- **Positioning:** open-source framework for developers, freelancers, and
+  agencies — git/IDE-native content next to website, app, or project context.
+- **Google Indexing setup/CLI:** hard-gated for blogs (`--force` only);
+  setup guide warns BlogPosting is out of API scope.
+
+## [0.2.0] — 2026-07-17
+
+### Added
+- **IndexNow**: post-deploy URL notify (add/update/delete) via `glint indexnow`
+  with git SHA delta, twin expansion, host filter, HTTP gate (`redirect: manual`),
+  batch ≤10k, 200/202/429 handling. Build-time key file + twin sitemap injection
+  via `glintIndexNow()`; one-time setup via `glint migrate indexnow`. Durable
+  cursor required (`--since-sha`); no HEAD~1 default. Key path root vs mount-scoped.
+- **AEO twins**: `text/plain` + `Content-Disposition: inline` + `Link` canonical to
+  HTML; post pages emit `rel="alternate" type="text/markdown"`.
+- **doctor**: IndexNow key/integration/post-deploy warnings; GA4 empty-config; GSC meta soft-warn (DNS OK); Coolify-aware IndexNow hook message.
+- **migrate indexnow**: also scaffolds missing `analytics` / `verification` / `indexNow` fields on existing site.config.ts.
 - **pipeline**: Receive content briefs handed over from product/app projects (the
   OpenStart content handoff). `/plan` now drains a root `CONTENT-INBOX.md` and open
   `content`-labelled issues into `data/content-plan.md` before brainstorming
   (`docs/pipeline/plan.md`, `docs/CONTENT-PIPELINE.md`).
+
+### Changed
+- **build**: removed build-time IndexNow HTTP ping (race with deploy); submit is
+  post-deploy only.
+
+### Fixed
+- IndexNow root `keyLocation` uses domain origin when blog is mounted under a path.
 - **scaffold**: Ship a `content-brief` GitHub issue form
   (`src/scaffold/theme/.github/ISSUE_TEMPLATE/content-brief.yml`) so GitHub-mode
   briefs arrive structured; new sites get it via `glint new`.

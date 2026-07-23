@@ -87,50 +87,38 @@ The content pipeline plays (`docs/pipeline/*.md`) and orchestration documentatio
 
 ---
 
-## 2026-07-13
+## 2026-07-17
 
-**Decision 12 — Markdown twins served as `text/plain` + `Content-Disposition: inline`, not `text/markdown`**
-`/raw/<collection>/<slug>.md` now serves `text/plain; charset=utf-8` with
-`Content-Disposition: inline`, replacing the previous `text/markdown; charset=utf-8`.
-`text/markdown` is the semantically "correct" IETF media type (RFC 7763), but browser
-and tool support for it is inconsistent — some clients offer it as a download instead
-of rendering inline. `text/plain` + explicit `inline` disposition renders reliably
-everywhere (browsers and AI agent fetchers alike) at the cost of the more precise
-MIME type. Revisit if `text/markdown` client support becomes reliably universal.
+**Decision 12 — IndexNow post-deployment protocol model**
+IndexNow URL submission is split into two phases: (1) build-time generation (the `glintIndexNow` Astro integration writes the verification `<key>.txt` file and injects `/raw` twin URLs into sitemaps), and (2) post-deployment ping (`glint indexnow` command).
+- **Why**: Triggering the HTTP submit requests during Astro build-time causes search engines to immediately query the site for the verification key file. Since the site has not yet been deployed or uploaded to the CDN/VPS (e.g. Cloudflare Pages or Coolify), they encounter a 404 error and reject the submission. Moving the HTTP submit to a post-deploy step prevents this race condition.
+- **Durable Cursor**: The post-deploy command compares the current commit SHA with a durable commit cursor (`--since-sha`) stored in the deploy environment to submit only added, modified, or deleted URLs, preventing spamming search engines with historical sitemap pings.
 
-**Decision 13 — Reference implementation: hand-rolled `sitemap.xml.ts` over `@astrojs/sitemap`**
-`examples/playground` now generates `sitemap.xml` itself
-(`src/pages/sitemap.xml.ts`) instead of via the `@astrojs/sitemap` integration, so
-`/raw/blog/<slug>.md` twins can be listed alongside their HTML counterparts at a
-distinct, lower `priority` (0.8 HTML / 0.4 twin) — the default integration only
-sees rendered Astro routes, not sibling API-route twins. `robots.txt` was updated
-to point at `/sitemap.xml` (was `/sitemap-index.xml`, the old integration's output
-name).
-**Scope note:** this change is scoped to the reference implementation
-(`examples/playground`) only, per the requesting task. The scaffold templates
-(`src/scaffold/theme*/src/pages/raw/blog/[slug].md.ts.tmpl`, the `astro.config.ts`
-generator in `src/cli/commands/new.ts`) still produce the old `text/markdown`
-header and rely on `@astrojs/sitemap` with no twin entries — new brand sites via
-`glint new` do **not** yet get this pattern. Propagating it to the scaffold/CLI so
-every brand gets it out of the box is tracked as follow-up work (the original ask
-in the engine feedback issue for markdown-twin sitemap support).
+---
 
-**Decision 14 — Custom response headers need `public/_headers`; the route code alone doesn't serve them**
-Verified with `astro build && astro preview` + `curl -I`: this site has no
-`output: "server"` / adapter, so every endpoint (`.ts` routes included) is
-prerendered once at build time to a plain static file, and the `headers: {...}`
-passed to `new Response(...)` in the route handler is **discarded** — a generic
-static host infers `Content-Type` from the file extension instead (confirmed:
-`/raw/blog/hello-glint.md` served as `Content-Type: text/markdown` with no
-`Content-Disposition`, not the `text/plain` + `inline` the route code sets).
-Fix: `public/_headers` (Cloudflare Pages' and Netlify's static-header-rules
-convention — Astro copies `public/` verbatim into `dist/`), mapping
-`/raw/blog/*.md` and `/sitemap.xml` to the intended headers. This covers the
-project's documented default host (Cloudflare Pages) and Netlify. It does
-**not** cover Vercel (`vercel.json` `headers`) or a bare VPS/Nginx/Caddy origin
-(server-config, outside this repo) — those need their own equivalent, not done
-here. **This also could not be verified end-to-end locally**: `astro preview`
-serves `dist/` directly and has no knowledge of `_headers` (that convention is
-interpreted by Cloudflare Pages'/Netlify's edge layer on real deploys), so a
-local `curl -I` still shows the extension-inferred type even with the file
-present — confirming this requires an actual Cloudflare Pages/Netlify deploy.
+## 2026-07-23
+
+**Decision 13 — AEO: static in engine, negotiation at brand edge (human-gated)**
+
+- **Audience:** open-source framework for developers, freelancers, and agencies — rich content and blogs managed in git/IDE next to website, app, or project context. Not a hosted CMS.
+- **In framework:** markdown twin response headers + helpers (`markdownTwinResponse`), `llms.txt` / twins / schema — pure static, zero runtime, no third-party AEO package dependencies.
+- **Out of framework:** Accept / bot-UA content negotiation, optional public `.md` URL rewrite, HTTP `Link` + HTML `Vary` on HTML responses — require edge compute when a brand wants them.
+- **Why:** Glint’s contract is static-output and host-agnostic. A required Worker would break that contract.
+- **Agent protocol:** `docs/AEO.md` (synced to brands). Agents implement static AEO freely; **must ask humans before** deploying edge workers or changing CDN routes.
+- **Origin path stays** `/raw/blog/<slug>.md`; optional public `/blog/<slug>.md` is brand edge mapping only (plan: `.ai/docs/plans/aeo-edge-worker.md`).
+- **Docs policy:** do not name or promote external AEO products in user/agent docs; describe Glint’s own behaviour and opt-in edge notes only.
+- **Twin Content-Type:** `text/markdown; charset=utf-8` (with AEO headers), not `text/plain`. Supersedes earlier playground experiment that preferred plain text for inline browser rendering.
+
+**Decision 14 — Playground hand-rolled sitemap lists markdown twins**
+
+`examples/playground` generates `sitemap.xml` via `src/pages/sitemap.xml.ts` so
+`/raw/blog/<slug>.md` twins appear next to HTML posts (lower priority). Engine
+scaffolds still use `@astrojs/sitemap` + optional IndexNow twin injection —
+propagating hand-rolled twin listing to all brands is follow-up.
+
+**Decision 15 — Static twin headers may need `public/_headers` (CF Pages / Netlify)**
+
+Prerendered static files often ignore `Response` headers from API routes; hosts
+infer type from extension. Playground ships `public/_headers` for
+`/raw/blog/*.md` AEO headers and `/sitemap.xml` content-type on Cloudflare Pages
+and Netlify. Other hosts need their own header config.

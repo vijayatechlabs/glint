@@ -1,7 +1,10 @@
 # Glint — System Architecture
 
-> **Glint** — the lightning publishing engine for the AI era.
-> Git-native · static-output · agent-first · edge-delivered · AEO-native.
+> **Glint** — open-source, git-native publishing for the AI era.
+> Static-output · agent-first · IDE-friendly · AEO-native.
+>
+> For developers, freelancers, and agencies who manage rich content and blogs
+> next to the website, app, or product they ship — without leaving the IDE.
 >
 > Working name. Sanskrit-family alternates: **Tejas** (brilliance/speed) or
 > **Vidyut** (lightning). Swap is a global find-replace.
@@ -26,15 +29,19 @@ also Vercel / Netlify / VPS+Coolify (per-brand `deployTarget`) ·
 
 ## 1. The one-liner
 
-A publishing engine where **content is files in git**, **the AI agent is the
-author**, **humans approve by reviewing a PR**, and the output is **pure static
-HTML + a JSON/MD content API served from the edge**. WordPress-grade media and
-reuse, none of the WordPress (or even EmDash) runtime.
+An open-source publishing framework where **content is files in git**, **the AI
+agent is the author (in the IDE, with product/site context)**, **humans approve
+by reviewing a PR**, and the output is **pure static HTML + a JSON/MD content
+API**. WordPress-grade media and reuse, none of the WordPress (or even EmDash)
+runtime.
+
+Built for **developers, freelancers, and agencies** who need blogs and rich
+content next to the apps and sites they already ship — not a second product
+with its own login and CMS.
 
 The thing we are actually building is **not a CMS**. It is a thin, opinionated
 **content contract + agent publishing loop + static build**, assembled on top of
-Astro + Cloudflare + off-the-shelf auth. We build only the unique 20%; we reuse
-everything else.
+Astro + your host of choice. We build only the unique 20%; we reuse everything else.
 
 ---
 

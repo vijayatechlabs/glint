@@ -1,11 +1,14 @@
 import { defineConfig } from "astro/config";
+import { glintOgImage, remarkResolveLinks, rehypeHeadingIds } from "@vijayatech/glint";
 
-// AEO: sitemap.xml is hand-rolled at src/pages/sitemap.xml.ts instead of via
-// @astrojs/sitemap, so raw Markdown twins (/raw/blog/<slug>.md) can be listed
-// alongside their HTML counterparts at a distinct, lower priority — the
-// default integration only sees routes it renders, not sibling twin routes.
-// See docs/DECISIONS.md for the full rationale.
+// Sitemap is hand-rolled at src/pages/sitemap.xml.ts so /raw/blog/*.md twins
+// are listed next to HTML posts (see docs/DECISIONS.md). @astrojs/sitemap is
+// intentionally omitted here to avoid a second sitemap file.
 export default defineConfig({
   site: "https://example.com",
-  integrations: [],
+  integrations: [glintOgImage({ brand: "Glint" })],
+  markdown: {
+    remarkPlugins: [remarkResolveLinks(import.meta.dirname)],
+    rehypePlugins: [rehypeHeadingIds()],
+  },
 });

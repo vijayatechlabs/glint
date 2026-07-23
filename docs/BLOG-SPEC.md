@@ -1,10 +1,11 @@
 # Glint Blog Spec — the SEO/AEO content framework
 
-Glint is a **fluid SEO & AEO content framework**: you (or an agent) write
-Markdown to a fixed contract, and the build *automatically* emits everything an
-answer engine and a search engine need — structured data, twins, feeds, internal
-links, search — with no per-post SEO busywork. This file is the **definition of
-done** for `glint build` / `doctor` / `status`.
+Glint is an open-source, **git-native** SEO & AEO content framework for
+**developers, freelancers, and agencies**: you (or an agent) write Markdown next
+to the website, app, or product it supports — without leaving the IDE — and the
+build *automatically* emits everything search and answer engines need: structured
+data, twins, feeds, internal links, search. No per-post SEO busywork. This file is
+the **definition of done** for `glint build` / `doctor` / `status`.
 
 Decisions consolidated here were made 2026-06-02.
 
@@ -24,7 +25,8 @@ feel like part of the app — never a separate product.
 - **Escape hatch**: `public/custom.css` for brand-specific overrides.
 - **Auth/gating**: OFF by default; opt-in edge check only for the rare gated brand.
 - **Non-goals**: page builders, multiple themes, heavy layout customization,
-  publishing-house workflows. Glint is for small teams — speed, simplicity, SEO/AEO.
+  publishing-house workflows. Glint is for developers and small teams shipping
+  product-adjacent content — speed, simplicity, SEO/AEO, stay in git.
 
 ---
 
@@ -74,16 +76,23 @@ For every published post + listing, the build emits — with **no manual work**:
 
 - **JSON-LD / schema.org:** `BlogPosting`/`Article`, `BreadcrumbList`,
   `Organization`, and `Person` (author).
-- **`llms.txt`** — index of canonical URLs + raw twin links for AI crawlers.
-- **Markdown twins** — `/raw/<collection>/<slug>.md` (the source, served clean as
-  `text/plain; charset=utf-8` + `Content-Disposition: inline`, so it renders
-  directly for browsers and AI agent fetchers instead of downloading — see
-  `docs/DECISIONS.md` 2026-07-13).
-- **`sitemap.xml`** (twin URLs included at a lower `priority` than their HTML
-  counterpart — see `examples/playground/src/pages/sitemap.xml.ts`) +
-  **RSS/Atom feed** (`feed.xml`).
+- **`llms.txt`** (+ optional `llms-full.txt`) — index of canonical URLs + raw twin
+  links for AI crawlers.
+- **Markdown twins** — `/raw/blog/<slug>.md` with AEO response headers
+  (`text/markdown; charset=utf-8`, `X-Markdown-Tokens`, `X-Robots-Tag: noindex`,
+  `Vary`, `X-AEO-Version`, `nosniff`, canonical `Link`) via
+  `markdownTwinResponse` from `@vijayatech/glint`. See **`docs/AEO.md`**.
+  Static hosts may need `public/_headers` (or host config) so those headers stick.
+- **Not automatic (edge, human-approved):** HTTP content negotiation
+  (`Accept` / bot UA), optional public `.md` URL rewrite, HTML `Vary` / HTTP
+  `Link` — opt-in per brand; agents must not deploy without approval
+  (`docs/AEO.md` §3–4).
+- **`sitemap.xml`** + **RSS/Atom feed** — HTML posts and (where implemented)
+  twin URLs at lower priority; playground hand-rolls twins into sitemap
+  (`examples/playground/src/pages/sitemap.xml.ts`). Engine default uses
+  `@astrojs/sitemap` + optional IndexNow twin injection.
 - **Canonical URLs**, OpenGraph + Twitter meta, and **auto-generated per-post OG
-  images** (satori / astro-og-canvas).
+  images**.
 - **JSON content API** — `/api/<collection>.json` + `/api/<collection>/<slug>.json`
   for apps/mobile consumers.
 - Per-post: **breadcrumbs, reading time, table of contents, related posts**.
@@ -118,10 +127,11 @@ the site. (Self-hosted Umami on the Coolify VPS is the alternative.)
 - `glint status` — content board (✅ implemented).
 - `glint doctor` — schema + scaffolding + taxonomy-registry + dup-slug +
   broken-internal-link + missing-image / inline-alt checks + onboarding-placeholder
-  warnings (unfilled strategy/voice/taxonomy); fails (exit 1) on any ERROR (✅ implemented).
+  warnings + AEO twin-header WARNs; fails (exit 1) on any ERROR (✅ implemented).
 - `glint build` — Astro static build honoring §1 draft rules (✅ v1: HTML +
   `BlogPosting` JSON-LD + canonical/OG + sitemap + RSS + `llms.txt` + `/raw` twins
-  + `/api/blog.json` + reading time). **v2:** category/tag archives, related posts,
-  Pagefind search, auto OG images, per-post JSON, internal-link registry.
+  with AEO twin headers + `/api/blog.json` + reading time). **v2:** category/tag
+  archives, related posts, Pagefind search, auto OG images, per-post JSON,
+  internal-link registry.
 - `glint preview` — Astro dev with drafts visible + `noindex` banner (✅).
 - Reference implementation + dogfood: `examples/playground/` (a buildable Glint site).
