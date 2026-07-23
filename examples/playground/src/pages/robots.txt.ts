@@ -8,6 +8,8 @@ const RETRIEVAL_BOTS = [
   "ChatGPT-User",
   "Perplexity-User",
   "PerplexityBot",
+  "Claude-User",
+  "Claude-SearchBot",
   "ClaudeBot",
 ];
 
@@ -15,8 +17,10 @@ const TRAINING_BOTS = [
   "GPTBot",
   "CCBot",
   "Google-Extended",
+  "Applebot-Extended",
   "anthropic-ai",
-  "ClaudeBot-Training",
+  "Bytespider",
+  "meta-externalagent",
 ];
 
 function buildRobotsTxt(sitemapUrl: string, policy: string): string {

@@ -160,6 +160,14 @@ export async function runDoctor(args: string[]): Promise<void> {
           "verification.google is empty — OK if Search Console is verified via DNS only; otherwise set the GSC meta-tag token (or document DNS verification in brand ops).",
         );
       }
+      const bingMatch = verificationBlock?.[1]?.match(/bing\s*:\s*["'`]([^"'`]*)["'`]/);
+      if (!bingMatch || bingMatch[1] === "") {
+        add(
+          "data/site.config.ts",
+          "WARN",
+          "verification.bing is empty — Bing Webmaster + IndexNow matter for AI-adjacent discovery (Copilot / Bing-backed answers). Verify the site in Bing WT; IndexNow does not replace Google Search Console.",
+        );
+      }
 
       const indexNowMatch = configText.match(/indexNow\s*:\s*(\{[\s\S]*?\}|["'`]([^"'`]*)["'`])/);
       let indexNowKey = "";
@@ -297,6 +305,49 @@ export async function runDoctor(args: string[]): Promise<void> {
           "WARN",
           "no markdown twin route found — AI clients cannot fetch /raw/blog/<slug>.md. Scaffold from engine templates (docs/AEO.md).",
         );
+      }
+
+      // llms.txt / llms-full quality (AEO discovery — cheap eligibility, not a citation guarantee)
+      const llmsCandidates = ["src/pages/llms.txt.ts", "src/pages/llms.txt.js"];
+      const llmsFullCandidates = ["src/pages/llms-full.txt.ts", "src/pages/llms-full.txt.js"];
+      const llmsPath = llmsCandidates.map((r) => join(dir, r)).find((p) => existsSync(p));
+      const llmsFullPath = llmsFullCandidates.map((r) => join(dir, r)).find((p) => existsSync(p));
+      if (hasPublishedPosts && !llmsPath) {
+        add(
+          "src/pages/llms.txt.ts",
+          "WARN",
+          "no llms.txt route — AI agents use it as a content tour guide. Scaffold from engine templates (docs/AEO.md).",
+        );
+      }
+      if (hasPublishedPosts && !llmsFullPath) {
+        add(
+          "src/pages/llms-full.txt.ts",
+          "WARN",
+          "no llms-full.txt route — optional full-body feed for AI one-fetch. Scaffold from engine templates when you want full-text eligibility.",
+        );
+      }
+      if (llmsPath && llmsFullPath) {
+        const llmsSrc = readFileSync(llmsPath, "utf8");
+        const fullSrc = readFileSync(llmsFullPath, "utf8");
+        const fullHasBody =
+          fullSrc.includes("p.body") ||
+          fullSrc.includes("post.body") ||
+          fullSrc.includes(".body") ||
+          fullSrc.includes("MAX_BYTES");
+        if (!fullHasBody && Math.abs(fullSrc.length - llmsSrc.length) < 200) {
+          add(
+            "src/pages/llms-full.txt.ts",
+            "WARN",
+            "llms-full.txt looks like a stub/clone of llms.txt — full feed should include post bodies (see engine llms-full template).",
+          );
+        }
+        if (!llmsSrc.includes("llms-full")) {
+          add(
+            "src/pages/llms.txt.ts",
+            "WARN",
+            "llms.txt does not reference llms-full.txt — add a Full content link when llms-full exists.",
+          );
+        }
       }
 
       // Google Indexing API — NOTE: Google documents the Web Search Indexing API for

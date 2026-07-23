@@ -6,19 +6,23 @@ import { site } from "../../data/site.config";
 // See .ai/docs/plans/seo-aeo-uplift.md §2.7
 
 const RETRIEVAL_BOTS = [
-  "OAI-SearchBot",    // ChatGPT search
-  "ChatGPT-User",     // ChatGPT browsing
-  "Perplexity-User",  // Perplexity answers
-  "PerplexityBot",    // Perplexity index
-  "ClaudeBot",        // Anthropic retrieval
+  "OAI-SearchBot",
+  "ChatGPT-User",
+  "Perplexity-User",
+  "PerplexityBot",
+  "Claude-User",
+  "Claude-SearchBot",
+  "ClaudeBot",
 ];
 
 const TRAINING_BOTS = [
-  "GPTBot",           // OpenAI training
-  "CCBot",            // Common Crawl (AI training source)
-  "Google-Extended",  // Google AI training opt-out
-  "anthropic-ai",     // Anthropic training
-  "ClaudeBot-Training",
+  "GPTBot",
+  "CCBot",
+  "Google-Extended",
+  "Applebot-Extended",
+  "anthropic-ai",
+  "Bytespider",
+  "meta-externalagent",
 ];
 
 function buildRobotsTxt(sitemapUrl: string, policy: string): string {

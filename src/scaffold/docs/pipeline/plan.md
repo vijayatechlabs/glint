@@ -20,13 +20,21 @@ Use this play to ideate new content ideas, propose headlines, and add them to th
    re-imported; for an issue, comment that it's queued. Skip anything that
    duplicates an existing post or backlog item — sharpen the angle instead.
 2. Scan the existing posts under `content/` and `data/content-plan.md` to avoid duplicating topics.
-3. Brainstorm a shortlist of 3–5 specific, benefit-led titles matching one of the brand's core pillars. Include the drained product briefs alongside your own ideas.
-4. For each proposed title, define:
+3. **Question / gap map (AEO research, before titles).** For the pillar or product
+   area you are planning, briefly list:
+   - 3–7 questions buyers or users ask (decision-shaped, not keyword stuffing);
+   - which sources already dominate AI/search answers (if known — web search OK);
+   - one evidence gap this brand can own (original data, product truth, how-to).
+   This is **editorial infrastructure**, not a citation promise. Skip if the human
+   already supplied a locked brief.
+4. Brainstorm a shortlist of 3–5 specific, benefit-led titles matching one of the brand's core pillars. Include the drained product briefs alongside your own ideas. Prefer titles that close an evidence gap from step 3.
+5. For each proposed title, define:
    - The core Pillar it supports.
    - The Content Type (e.g., guide, comparison, listicle).
    - The main value hook / angle.
-5. Output the shortlist of ideas for the human to review.
-6. Once the human selects/approves a title, add it to `data/content-plan.md` under `## Approved (ready to draft)` using the format:
+   - The primary question it answers (from the gap map).
+6. Output the shortlist of ideas for the human to review.
+7. Once the human selects/approves a title, add it to `data/content-plan.md` under `## Approved (ready to draft)` using the format:
    `- [approved] Pillar · Type · Title — angle/note`
 
 Do NOT draft any posts or create files under `content/` during this step.

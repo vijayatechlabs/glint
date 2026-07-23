@@ -2,6 +2,7 @@ import { copyFileSync, existsSync, readFileSync, readdirSync, writeFileSync } fr
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse } from "yaml";
+import { injectTwinUrlsIntoSitemaps } from "../lib/indexnow.js";
 
 export interface GlintSitemapOptions {
   /** Output filename without extension, e.g. "sitemap-blog". Defaults to "sitemap-index". */
@@ -103,12 +104,56 @@ export function buildLastmodMapFromContent(contentRoot: string): Map<string, str
   return lastmodMap;
 }
 
+/** Parse baseUrl + mount from data/site.config.ts text (no TS import). */
+export function parseSiteBaseFromConfig(projectDir: string): { baseUrl: string; mount: string } | null {
+  const p = join(projectDir, "data", "site.config.ts");
+  if (!existsSync(p)) return null;
+  const text = readFileSync(p, "utf8");
+  const baseUrl = text.match(/baseUrl\s*:\s*["'`]([^"'`]+)["'`]/)?.[1];
+  if (!baseUrl) return null;
+  const mount = text.match(/mount\s*:\s*["'`]([^"'`]*)["'`]/)?.[1] ?? "/";
+  return { baseUrl: baseUrl.replace(/\/$/, ""), mount };
+}
+
+/** Build absolute twin URLs for public posts (priority injection into sitemaps). */
+export function buildTwinUrlsFromContent(projectDir: string): string[] {
+  const site = parseSiteBaseFromConfig(projectDir);
+  if (!site) return [];
+  const contentRoot = join(projectDir, "content");
+  if (!existsSync(contentRoot)) return [];
+  const twins: string[] = [];
+  for (const entry of readdirSync(contentRoot, { recursive: true }) as string[]) {
+    if (!entry.endsWith(".md")) continue;
+    const parts = entry.split(/[\\/]/);
+    if (parts.length < 2) continue;
+    const collection = parts[0]!;
+    try {
+      const text = readFileSync(join(contentRoot, entry), "utf8");
+      const fm = text.match(/^---\n([\s\S]*?)\n---/);
+      if (!fm) continue;
+      const data = (parse(fm[1]!) as Record<string, unknown>) ?? {};
+      if (data.draft === true || data.visibility === "members") continue;
+      const slug = String(data.slug ?? parts[parts.length - 1]!.replace(/\.md$/, ""));
+      // Twins always under /raw/blog/ for Glint blog collection
+      if (collection === "blog") {
+        twins.push(`${site.baseUrl}/raw/blog/${slug}.md`);
+      } else {
+        twins.push(`${site.baseUrl}/raw/${collection}/${slug}.md`);
+      }
+    } catch {
+      /* skip */
+    }
+  }
+  return twins;
+}
+
 /**
- * Post-build integration that injects `<lastmod>` into every sitemap `<url>`
- * element by reading `updatedAt ?? publishedAt` from content frontmatter.
- * Zero-config — uses existing content files, no new schema fields required.
+ * Post-build integration that:
+ * 1. Injects `<lastmod>` from content frontmatter
+ * 2. Injects markdown twin URLs (`/raw/...md`) at priority 0.5 — zero-config AEO discovery
  *
  * Must be registered AFTER `@astrojs/sitemap` and `glintSitemap`.
+ * Twin inject also runs via `glintIndexNow` when IndexNow is configured (idempotent).
  */
 export function glintSitemapLastmod(): {
   name: string;
@@ -121,9 +166,8 @@ export function glintSitemapLastmod(): {
         const distDir = fileURLToPath(dir);
         const projectDir = process.cwd();
         const lastmodMap = buildLastmodMapFromContent(join(projectDir, "content"));
-        if (lastmodMap.size === 0) return;
 
-        let sitemapFiles: string[];
+        let sitemapFiles: string[] = [];
         try {
           sitemapFiles = readdirSync(distDir).filter(
             (f: string) => f.startsWith("sitemap") && f.endsWith(".xml"),
@@ -132,41 +176,54 @@ export function glintSitemapLastmod(): {
           return;
         }
 
-        let totalPatched = 0;
-        for (const file of sitemapFiles) {
-          const fullPath = join(distDir, file);
-          const content = readFileSync(fullPath, "utf8");
-          if (/<sitemapindex[\s>]/i.test(content)) continue;
+        if (lastmodMap.size > 0) {
+          let totalPatched = 0;
+          for (const file of sitemapFiles) {
+            const fullPath = join(distDir, file);
+            const content = readFileSync(fullPath, "utf8");
+            if (/<sitemapindex[\s>]/i.test(content)) continue;
 
-          let modified = false;
-          const patched = content.replace(
-            /<url>\s*<loc>([^<]+)<\/loc>(\s*<lastmod>[^<]*<\/lastmod>)?\s*/gi,
-            (match, loc: string, existingLastmod: string | undefined) => {
-              try {
-                const path = new URL(loc.trim()).pathname;
-                const lastmod = matchLastmod(path, lastmodMap);
-                if (lastmod) {
-                  modified = true;
-                  totalPatched++;
-                  if (existingLastmod) {
-                    return match.replace(existingLastmod, `<lastmod>${lastmod}</lastmod>`);
+            let modified = false;
+            const patched = content.replace(
+              /<url>\s*<loc>([^<]+)<\/loc>(\s*<lastmod>[^<]*<\/lastmod>)?\s*/gi,
+              (match, loc: string, existingLastmod: string | undefined) => {
+                try {
+                  const path = new URL(loc.trim()).pathname;
+                  const lastmod = matchLastmod(path, lastmodMap);
+                  if (lastmod) {
+                    modified = true;
+                    totalPatched++;
+                    if (existingLastmod) {
+                      return match.replace(existingLastmod, `<lastmod>${lastmod}</lastmod>`);
+                    }
+                    return `<url>\n    <loc>${loc.trim()}</loc>\n    <lastmod>${lastmod}</lastmod>\n    `;
                   }
-                  return `<url>\n    <loc>${loc.trim()}</loc>\n    <lastmod>${lastmod}</lastmod>\n    `;
+                } catch {
+                  /* invalid URL */
                 }
-              } catch {
-                /* invalid URL */
-              }
-              return match;
-            },
-          );
+                return match;
+              },
+            );
 
-          if (modified) writeFileSync(fullPath, patched, "utf8");
+            if (modified) writeFileSync(fullPath, patched, "utf8");
+          }
+
+          if (totalPatched > 0) {
+            console.log(
+              `[glint-sitemap-lastmod] Injected <lastmod> into ${totalPatched} URL(s).`,
+            );
+          }
         }
 
-        if (totalPatched > 0) {
-          console.log(
-            `[glint-sitemap-lastmod] Injected <lastmod> into ${totalPatched} URL(s).`,
-          );
+        // Always-on twin discovery (no IndexNow key required)
+        const twins = buildTwinUrlsFromContent(projectDir);
+        if (twins.length > 0) {
+          const n = injectTwinUrlsIntoSitemaps(distDir, twins, "0.5");
+          if (n > 0) {
+            console.log(
+              `[glint-sitemap-lastmod] Injected ${n} markdown twin URL(s) into sitemap (priority 0.5).`,
+            );
+          }
         }
       },
     },

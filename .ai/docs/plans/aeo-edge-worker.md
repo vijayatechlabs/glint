@@ -13,6 +13,18 @@ as `docs/AEO.md` via `glint sync`.
 
 ---
 
+## 0. Prefer platform-native when available
+
+Before writing a custom Worker, check the host:
+
+| Host | Prefer first |
+|------|----------------|
+| **Cloudflare** | [Markdown for Agents](https://developers.cloudflare.com/fundamentals/reference/markdown-for-agents/) (Accept → markdown at the edge). Still needs **human approval** to enable. |
+| **Custom twin bodies** (`/raw/…` + Glint headers) | This Worker / middleware still useful |
+| **No edge compute** | Static twins only |
+
+Agents may send `Accept: text/markdown` **or** `text/plain` — honor both as “prefer clean text” when negotiating.
+
 ## 1. Why this is not engine code
 
 Glint builds pure static HTML + markdown files. Content negotiation requires

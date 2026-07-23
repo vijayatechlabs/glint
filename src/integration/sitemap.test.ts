@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { matchLastmod, normalizeSitemapPath } from "./sitemap.js";
+import { matchLastmod, normalizeSitemapPath, buildTwinUrlsFromContent, parseSiteBaseFromConfig } from "./sitemap.js";
 
 describe("matchLastmod", () => {
   const map = new Map<string, string>([
@@ -23,5 +23,12 @@ describe("matchLastmod", () => {
 
   it("normalizes trailing slash", () => {
     assert.equal(normalizeSitemapPath("/x"), "/x/");
+  });
+});
+
+describe("parseSiteBaseFromConfig / buildTwinUrlsFromContent", () => {
+  it("returns null when site.config missing", () => {
+    assert.equal(parseSiteBaseFromConfig("/nonexistent-project-xyz"), null);
+    assert.deepEqual(buildTwinUrlsFromContent("/nonexistent-project-xyz"), []);
   });
 });

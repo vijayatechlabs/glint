@@ -5,20 +5,26 @@ import { site } from "../../data/site.config";
 // "all" = allow everything; "retrieval-only" = block training bots, allow retrieval; "none" = block all AI bots.
 // See .ai/docs/plans/seo-aeo-uplift.md §2.7
 
+// Retrieval / user-action bots: answers & search (prefer allow when owner wants AI citations)
 const RETRIEVAL_BOTS = [
-  "OAI-SearchBot",    // ChatGPT search
-  "ChatGPT-User",     // ChatGPT browsing
-  "Perplexity-User",  // Perplexity answers
-  "PerplexityBot",    // Perplexity index
-  "ClaudeBot",        // Anthropic retrieval
+  "OAI-SearchBot",    // OpenAI search
+  "ChatGPT-User",     // ChatGPT user-triggered browse
+  "Perplexity-User",  // Perplexity user answers
+  "PerplexityBot",    // Perplexity crawl/index
+  "Claude-User",      // Anthropic user-triggered
+  "Claude-SearchBot", // Anthropic search
+  "ClaudeBot",        // Anthropic crawler (often mixed purpose — treat as retrieval-allow)
 ];
 
+// Training-oriented crawlers (block under retrieval-only / none)
 const TRAINING_BOTS = [
   "GPTBot",           // OpenAI training
-  "CCBot",            // Common Crawl (AI training source)
-  "Google-Extended",  // Google AI training opt-out
-  "anthropic-ai",     // Anthropic training
-  "ClaudeBot-Training",
+  "CCBot",            // Common Crawl
+  "Google-Extended",  // Google generative AI opt-out (≠ Googlebot)
+  "Applebot-Extended",
+  "anthropic-ai",
+  "Bytespider",
+  "meta-externalagent",
 ];
 
 function buildRobotsTxt(sitemapUrl: string, policy: string): string {

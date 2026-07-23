@@ -46,10 +46,16 @@ If the brand never customized a file, copying the latest `.tmpl` (strip `.tmpl`)
 
 | Field | Action |
 |---|---|
-| `aiCrawlers` | Set explicitly: `"all"` \| `"retrieval-only"` \| `"none"` |
+| `aiCrawlers` | Set explicitly: `"all"` \| `"retrieval-only"` \| `"none"` (retrieval-only allows answer bots, blocks training scrapers) |
 | `social` / `logo` | Fill for Organization JSON-LD |
-| `verification` / `analytics` | Keep measurement setup (GSC/GA) separate from this content upgrade |
-| Google Indexing API | **Do not** enable for normal blogs — API is not for BlogPosting. Use sitemap + GSC. `glint index` requires `--force` |
+| `verification.google` | GSC meta or DNS |
+| `verification.bing` | Bing Webmaster — matters for AI-adjacent / IndexNow paths |
+| `analytics.ga4` | Organic + optional AI referral measurement |
+| Google Indexing API | **Do not** enable for normal blogs — not for BlogPosting. Use sitemap + GSC. |
+
+### Paired OpenStart app + this blog
+
+See **`docs/AEO.md` §2**. Site AEO lives in the OpenStart repo; blog AEO here; content handoff keeps product and posts aligned.
 
 ---
 

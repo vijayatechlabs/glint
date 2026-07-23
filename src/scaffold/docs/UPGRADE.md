@@ -44,7 +44,9 @@ Merge by hand if customized — do not overwrite brand chrome blindly.
 
 - Set `aiCrawlers` explicitly (`all` | `retrieval-only` | `none`).
 - Fill `social` / `logo` when you care about Organization schema.
-- **Do not** use Google Indexing API for normal blog posts (`glint index` needs `--force` for a reason). Prefer sitemap + GSC.
+- Verify **GSC + Bing Webmaster** (IndexNow does not replace Google).
+- **Do not** use Google Indexing API for normal blog posts. Prefer sitemap + GSC.
+- Paired product site (OpenStart): see `docs/AEO.md` §2.
 
 ---
 

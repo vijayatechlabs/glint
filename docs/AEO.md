@@ -1,12 +1,12 @@
 # AEO in Glint
 
-How Glint helps blogs stay readable by people **and** by AI search/answer engines —
+How Glint helps **blogs** stay readable by people **and** by AI search/answer engines —
 **what the framework does automatically**, and **what must stay per-project
 (with human approval)**.
 
-Glint is an open-source, **git-native** publishing framework: developers,
-freelancers, and agencies manage rich content next to the website, app, or
-project it supports — without leaving the IDE or inventing a separate CMS.
+Glint is open-source, **git-native** publishing for **blogs and long-form content**.
+Pair with **OpenStart** for websites, landing pages, and product apps. Together they
+aim for better **SEO** and **AI citation eligibility** (not ranking guarantees).
 
 ---
 
@@ -14,122 +14,135 @@ project it supports — without leaving the IDE or inventing a separate CMS.
 
 | Layer | Who | Examples |
 |---|---|---|
-| **Static build (framework)** | Glint templates + `markdownTwinResponse` | `/raw/blog/<slug>.md` with AEO headers, `llms.txt`, HTML `<link rel=alternate>`, robots AI policy, JSON-LD |
-| **Edge / CDN (brand)** | Brand + **human approval** | `Accept: text/markdown` routing, AI-bot User-Agent routing, optional public `…/post.md` rewrite, HTML `Vary` / HTTP `Link` |
+| **Static build (framework)** | Glint templates + `markdownTwinResponse` | `/raw/blog/<slug>.md` with AEO headers, `llms.txt`, HTML `<link rel=alternate>`, robots AI policy, JSON-LD, twins in sitemap |
+| **Edge / CDN (brand)** | Brand + **human approval** | `Accept: text/markdown` (or platform Markdown-for-Agents), bot UA routing, public `.md` rewrite |
 
-**Rule for agents:** implement **framework** pieces freely (content, twin headers,
-doctor). For **edge** pieces, **ask a human and wait for approval** before
-deploying Workers, middleware, or CDN routes. Never block a content PR on edge
-negotiation.
+**Rule for agents:** implement **framework** pieces freely. For **edge** pieces,
+**ask a human and wait for approval**. Never block a content PR on edge negotiation.
 
 ---
 
-## 2. What Glint ships at build time
+## 2. Paired brand (OpenStart app + Glint blog)
 
-For each published post the build emits a **markdown twin** at:
+When a product site and its blog are separate repos:
+
+| Surface | Owner |
+|---------|--------|
+| Marketing pages, app SEO, landing FAQ/schema | **OpenStart** project + its AEO standard |
+| Blog twins, llms for posts, Glint doctor, `glint indexnow` | **This Glint blog** |
+| Content handoff (feature → post brief) | OpenStart `content.sh` → Glint `/plan` inbox |
+| GSC + **Bing Webmaster** | Domain owner — both matter (Bing/IndexNow for some AI paths) |
+| IndexNow | Prefer on the blog (Glint CLI); site may also notify if it has public URLs |
+
+**Checklist (agents + humans):**
+
+- [ ] Site: crawlable, schema, robots, llms (OpenStart)
+- [ ] Blog: `glint doctor` clean; twin headers; llms.txt + llms-full; upgrade via `docs/UPGRADE.md`
+- [ ] GSC verified (DNS or meta)
+- [ ] Bing Webmaster verified (IndexNow ≠ Google)
+- [ ] Content handoff configured if product and blog are split
+- [ ] No claims that headers or IndexNow guarantee citations
+
+---
+
+## 3. What Glint ships at build time
+
+### Markdown twin
 
 ```text
 /raw/blog/<slug>.md
 ```
 
-Headers (via `markdownTwinResponse` from `@vijayatech/glint`):
+Headers (via `markdownTwinResponse`):
 
 | Header | Value |
 |---|---|
 | `Content-Type` | `text/markdown; charset=utf-8` |
 | `Content-Disposition` | `inline` |
 | `Link` | `<{htmlUrl}>; rel="canonical"` |
-| `X-Robots-Tag` | `noindex, follow` (twins stay out of the HTML index) |
-| `X-Markdown-Tokens` | `ceil(utf8Bytes / 4)` (budget heuristic for AI clients) |
+| `X-Robots-Tag` | `noindex, follow` |
+| `X-Markdown-Tokens` | `ceil(utf8Bytes / 4)` |
 | `Vary` | `Accept, User-Agent` |
 | `X-AEO-Version` | `1.0` |
 | `X-Content-Type-Options` | `nosniff` |
 
-Also automatic (elsewhere in the theme):
+Also automatic:
 
-- HTML `<link rel="alternate" type="text/markdown" href="…/raw/blog/…">`
-- `llms.txt` / `llms-full.txt` indexes
-- `robots.txt` AI crawler policy from `site.aiCrawlers`
-- JSON-LD, sitemap, RSS, IndexNow (post-deploy)
+- HTML `<link rel="alternate" type="text/markdown">`
+- `llms.txt` / `llms-full.txt` (size-guarded full feed — must include real bodies, not a clone of the index)
+- Twin URLs injected into **sitemap** at lower priority (`glintSitemapLastmod` / IndexNow inject)
+- `robots.txt` from `site.aiCrawlers` (`all` | `retrieval-only` | `none`)
+- JSON-LD, RSS, IndexNow key file at build; HTTP notify **post-deploy**
 
-### Upgrade an existing brand twin
+### AI crawler modes (`aiCrawlers`)
 
-```ts
-import { markdownTwinResponse } from "@vijayatech/glint";
-// …
-return markdownTwinResponse(post.body ?? "", { htmlUrl });
-```
+| Mode | Behaviour |
+|------|-----------|
+| `all` | Default allow via `User-agent: *` |
+| `retrieval-only` | Allow user-action/search bots (ChatGPT-User, OAI-SearchBot, Perplexity-*, Claude-User/SearchBot, …); **Disallow** training-oriented (GPTBot, CCBot, Google-Extended, …) |
+| `none` | Disallow named AI bots; keep Googlebot/Bingbot via `*` for classic search |
 
-Or re-copy the engine template `raw/blog/[slug].md.ts.tmpl`.  
-`glint doctor` WARNs if the twin route is missing these markers.
+Set explicitly in `site.config.ts`. Revisit bot lists when major crawlers change.
 
-### Verify static twins
+### Measurement (eligibility, not vanity)
 
-```bash
-curl -sI https://<brand>/raw/blog/<slug>.md | grep -iE \
-  'content-type|x-markdown|x-robots|x-aeo|vary|x-content-type'
-```
+- **GSC** + **Bing Webmaster** — first-class
+- **GA4** — organic + optional AI referral events (see OpenStart `nextjs-analytics.ts` pattern; adapt for blog if needed)
+- IndexNow 200/202 = **receipt only**
 
 ---
 
-## 3. What cannot live in the framework (edge)
+## 4. Edge / content negotiation (human-gated)
 
-Static hosts cannot inspect `Accept` or `User-Agent` per request. Optional
-**content negotiation** needs an edge worker (or host middleware):
+Static hosts cannot inspect `Accept` / `User-Agent` per request.
 
 | Capability | Needs edge |
 |---|---|
-| `Accept: text/markdown` on the HTML URL → serve markdown | Yes |
-| Known AI bot UA (e.g. GPTBot) + loose Accept → markdown | Yes |
+| `Accept: text/markdown` **or** `text/plain` on HTML URL → markdown | Yes (or host feature) |
+| AI bot UA + loose Accept → markdown | Yes |
 | Unsupported Accept → `406` | Yes |
-| HTTP `Link: <…md>; rel="alternate"` on HTML responses | Yes (or host config) |
-| HTML response `Vary: Accept` | Yes (or host config) |
-| Public twin at `/blog/<slug>.md` while origin is `/raw/blog/<slug>.md` | Yes (rewrite) |
+| HTTP `Link` alternate + HTML `Vary: Accept` | Yes (or host config) |
 
-**Origin vs optional public twin URLs**
+**Prefer platform-native when available:**
 
-| Role | URL |
-|---|---|
-| Origin (Glint, always) | `/raw/blog/<slug>.md` |
-| Optional public alias | `/blog/<slug>.md` for HTML `/blog/<slug>/` — edge rewrite only |
+1. **Cloudflare Markdown for Agents** (Accept → markdown at edge) — enable in dashboard if on CF; still human-approved.  
+2. Custom Worker / middleware only if you need Glint **origin twins** (`/raw/…`) + custom headers.  
+3. Snippets: engine `.ai/docs/plans/aeo-edge-worker.md`.
 
-Reference snippets (not engine code):  
-`.ai/docs/plans/aeo-edge-worker.md` in the Glint engine repo.
+Agents **must not** deploy Workers/CDN routes without **explicit human approval**.
 
 ---
 
-## 4. Agent + human protocol (edge)
+## 5. Upgrade twin route
 
-1. Human asks for content negotiation, bot-UA routing, or CDN AEO behaviour — or
-   the brand’s deploy docs require it.
-2. Agent **does not** deploy. Agent:
-   - Opens `docs/AEO.md` + engine plan `aeo-edge-worker.md` if available
-   - Summarizes platform (CF / Vercel / Netlify), path mapping, cache/`Vary` risks
-   - Asks for **explicit human approval** (yes / no / revise)
-3. Only after approval: implement worker/middleware **in the brand repo or host
-   dashboard**, never as a required Glint dependency.
-4. Verify with curls (see edge plan) against the live brand URL.
+```ts
+import { markdownTwinResponse } from "@vijayatech/glint";
+return markdownTwinResponse(post.body ?? "", { htmlUrl });
+```
 
-**Never** treat edge deploy as part of `glint new` / `glint sync` / content PR
-merge without a separate human decision.
+See **`docs/UPGRADE.md`**.
+
+### Verify
+
+```bash
+curl -sI https://<brand>/raw/blog/<slug>.md | grep -iE 'content-type|x-markdown|x-robots|vary'
+curl -s https://<brand>/sitemap-0.xml | grep raw/blog   # or sitemap.xml
+```
 
 ---
 
-## 5. When to skip the edge
+## 6. When to skip the edge
 
 | Goal | Recommendation |
 |---|---|
-| Strong SEO + AI-readable content | Static Glint is enough (`llms.txt`, twins, schema) |
-| Same-URL Accept negotiation for crawlers | Human-approved edge worker |
-
-Most freelancers and agencies get full value from **static twins + PR workflow**
-without touching the edge.
+| Strong SEO + AI-readable content | Static Glint is enough |
+| Same-URL Accept negotiation | Human-approved edge or CF Markdown for Agents |
 
 ---
 
-## 6. References
+## 7. References
 
-- This doc (synced to brand sites via `glint sync`)
-- Brand upgrade steps: **`docs/UPGRADE.md`**
-- Engine plan: `.ai/docs/plans/aeo-edge-worker.md` (optional edge reference)
-- API: `markdownTwinHeaders` / `markdownTwinResponse` from `@vijayatech/glint`
+- Brand upgrade: **`docs/UPGRADE.md`**
+- Plan: `.ai/docs/plans/aeo-p0-visibility.md`
+- Edge snippets: `.ai/docs/plans/aeo-edge-worker.md`
+- OpenStart (sites): AEO standard + `aeo-p0-visibility.md` in the OpenStart repo

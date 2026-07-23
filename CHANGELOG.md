@@ -19,6 +19,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   middleware.
 - **docs/UPGRADE.md** (synced): short brand upgrade checklist for humans + agents
   after each engine release.
+- **Plan:** `.ai/docs/plans/aeo-p0-visibility.md` — AEO P0/P1 executed: paired OpenStart
+  checklist, llms quality doctor, Bing WT WARN, sitemap twin inject via
+  `glintSitemapLastmod`, retrieval bot lists, CF Markdown for Agents docs,
+  plan-play question/gap map.
 - **doctor:** WARN when twin route missing AEO headers or still on `text/plain`.
 - **SEO/AEO uplift completion:** TOC uses shared `extractHeadings` (IDs match
   `rehypeHeadingIds`); RSS `content` is basic HTML via `markdownToHtmlBasic`;
