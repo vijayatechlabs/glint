@@ -11,6 +11,7 @@ import { join } from "node:path";
 import { glintSchemas, type GlintCollection } from "../../content/schema.js";
 import { listPosts, parseCategories, parseTags } from "../../lib/content.js";
 import { lineIsScaffolding } from "../../lib/scaffolding.js";
+import { loadLinksRegistry, findBrokenLinkRefs } from "../../lib/remark-links.js";
 
 // Template files that should be filled at onboarding, with markers that mean
 // "still a placeholder". A site with these unfilled isn't ready to publish.
@@ -58,6 +59,7 @@ export async function runDoctor(args: string[]): Promise<void> {
     posts.filter((p) => p.data.draft !== true).map((p) => `/${p.collection}/${p.slug}`),
   );
   const slugSeen = new Map<string, string>(); // collection/slug -> file
+  const linksRegistry = loadLinksRegistry(dir);
 
   for (const p of posts) {
     // 1. schema validity
@@ -105,6 +107,12 @@ export async function runDoctor(args: string[]): Promise<void> {
         // from validPaths intentionally — linking to a draft is a broken link.
         add(p.file, "ERROR", `broken internal link to "${m[1]}" — not found among published posts (is the target a draft or does the slug not exist?)`);
       }
+    }
+
+    // 5b. broken links.json shortcode references ({{cta:id}} / {{ref:id}})
+    const brokenRefs = findBrokenLinkRefs(p.body, linksRegistry);
+    for (const ref of brokenRefs) {
+      add(p.file, "WARN", `broken link shortcode {{${ref.type}:${ref.id}}} — "${ref.id}" not found in data/links.json`);
     }
 
     // 6. referenced local images exist; inline images have alt text. Root-absolute
@@ -228,6 +236,86 @@ export async function runDoctor(args: string[]): Promise<void> {
           "data/site.config.ts",
           "WARN",
           "deployTarget is coolify — ensure Coolify post-deploy runs `glint indexnow --since-sha <cursor> --sha <deploy>` (GH workflow optional).",
+        );
+      }
+
+      // AI crawler policy — warn when not explicitly set (brand should make a conscious choice).
+      const aiCrawlersMatch = configText.match(/aiCrawlers\s*:\s*["'`]([^"'`]*)["'`]/);
+      if (!aiCrawlersMatch || aiCrawlersMatch[1] === "") {
+        add(
+          "data/site.config.ts",
+          "WARN",
+          "aiCrawlers not set — defaults to \"all\" (allows all AI bots). Set explicitly to \"all\", \"retrieval-only\", or \"none\".",
+        );
+      }
+
+      // AEO twin headers (static). Content negotiation is edge-only — docs/AEO.md.
+      const twinCandidates = [
+        "src/pages/raw/blog/[slug].md.ts",
+        "src/pages/raw/blog/[slug].md.js",
+      ];
+      let twinFound = false;
+      for (const rel of twinCandidates) {
+        const twinPath = join(dir, rel);
+        if (!existsSync(twinPath)) continue;
+        twinFound = true;
+        const twinSrc = readFileSync(twinPath, "utf8");
+        if (
+          twinSrc.includes("markdownTwinResponse") ||
+          twinSrc.includes("markdownTwinHeaders")
+        ) {
+          break;
+        }
+        const aeoMarkers = [
+          "text/markdown",
+          "X-Markdown-Tokens",
+          "X-Robots-Tag",
+          "X-AEO-Version",
+          "X-Content-Type-Options",
+        ];
+        const missing = aeoMarkers.filter((m) => !twinSrc.includes(m));
+        if (missing.length > 0) {
+          add(
+            rel,
+            "WARN",
+            `markdown twin missing AEO headers (${missing.join(", ")}). ` +
+              `Use markdownTwinResponse from @vijayatech/glint (see docs/AEO.md).`,
+          );
+        }
+        if (twinSrc.includes("text/plain") && !twinSrc.includes("text/markdown")) {
+          add(
+            rel,
+            "WARN",
+            "markdown twin still uses Content-Type text/plain — prefer text/markdown; charset=utf-8 (see docs/AEO.md).",
+          );
+        }
+        break;
+      }
+      if (!twinFound && hasPublishedPosts) {
+        add(
+          "src/pages/raw/blog/[slug].md.ts",
+          "WARN",
+          "no markdown twin route found — AI clients cannot fetch /raw/blog/<slug>.md. Scaffold from engine templates (docs/AEO.md).",
+        );
+      }
+
+      // Google Indexing API — NOTE: Google documents the Web Search Indexing API for
+      // JobPosting / BroadcastEvent only. Do NOT push blog sites to configure it.
+      // (Code exists in-tree for future supported content types; no WARN for blogs.)
+
+      // Social/entity links — warn when published posts exist but no social links (missed E-E-A-T).
+      const socialMatch = configText.match(/social\s*:\s*(\{[\s\S]*?\}|\[[\s\S]*?\])/);
+      const socialVal = socialMatch?.[1] ?? "";
+      const socialEmpty = !socialMatch
+        || socialVal === "{}"
+        || socialVal === "[]"
+        || /^\{\s*\}$/.test(socialVal)
+        || /^\[\s*\]$/.test(socialVal);
+      if (socialEmpty) {
+        add(
+          "data/site.config.ts",
+          "WARN",
+          "social links are empty — Organization JSON-LD sameAs will be omitted. Add Twitter/LinkedIn/GitHub URLs to strengthen entity signals.",
         );
       }
     }

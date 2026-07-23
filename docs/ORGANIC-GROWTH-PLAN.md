@@ -4,25 +4,26 @@ From "no visible results" to measurable organic + AEO growth across the Glint br
 
 **Canonical path:** `docs/ORGANIC-GROWTH-PLAN.md`  
 **Related design plan (IndexNow only):** `.ai/docs/plans/indexnow.md`  
+**Related engine uplift (SEO/AEO emitters):** `.ai/docs/plans/seo-aeo-uplift.md`  
 **OpenStart AEO standard:** sibling repo `OpenStart` → AEO-FRAMEWORK §8.4–§8.5  
 
-Updated: **2026-07-17** (aligned with shipped IndexNow + analytics scaffolding).
+Updated: **2026-07-22** (review of SEO/AEO uplift work + plan corrections; IndexNow + analytics scaffolding still baseline).
 
 ---
 
-## 0. Relationship to IndexNow (overlap vs contradiction)
+## 0. Relationship to IndexNow & SEO/AEO uplift
 
-| | **This plan (organic growth)** | **IndexNow plan** (`.ai/docs/plans/indexnow.md`) |
-|--|--------------------------------|--------------------------------------------------|
-| **Scope** | Full growth system: analytics, GSC/Bing, content strategy, AI traction, metrics loop | **One protocol**: notify engines of URL add/update/delete |
-| **Owns** | Sequencing, brand rollout, measurement runbook, content plays | CLI, Astro integration, migrate, keyLocation, durable cursor |
-| **Overlap** | Workstream **1c** *is* IndexNow rollout + Bing registration | Implementation detail for 1c |
-| **Contradiction?** | **No** — if this doc defers protocol rules to the IndexNow plan | Older drafts of *this* doc contradicted (build-time ping, `indexNow?: string`, sync-only rollout). **Those are fixed below.** |
+| | **This plan (organic growth)** | **IndexNow plan** | **SEO/AEO uplift plan** |
+|--|--------------------------------|-------------------|-------------------------|
+| **Scope** | Full growth system: analytics, GSC/Bing, content strategy, AI traction, metrics loop | **One protocol**: notify Bing/Yandex/Naver of URL add/update/delete | Engine-side emitters: llms-full, article meta, JSON-LD, lastmod, robots AI policy, FAQ/HowTo, etc. |
+| **Owns** | Sequencing, brand rollout, measurement runbook, content plays | CLI, Astro integration, migrate, keyLocation, durable cursor | Scaffold/templates/integrations + doctor WARNs for new surfaces |
+| **Overlap** | Workstream **1c** *is* IndexNow rollout + Bing registration; WS3 shares FAQ/entity work with uplift | Implementation detail for 1c | Implements parts of WS3 (3c, entity signals) + §5 AI surfaces in the **engine tree only** |
+| **Contradiction?** | **No** — if this doc defers protocol rules to the IndexNow plan | Older drafts of *this* doc contradicted (build-time ping, bare `indexNow` string). **Fixed.** | **Do not treat Google Indexing API as a blog growth lever** — Google documents it for JobPosting / BroadcastEvent only (see §7 + review). |
 
 **Rule:** Protocol behavior (when to ping, SHA cursor, 200/202, mounts, twins) lives in  
-`.ai/docs/plans/indexnow.md` + code. This plan only says **when brands turn it on** and how it fits GSC/Bing/GA.
+`.ai/docs/plans/indexnow.md` + code. This plan only says **when brands turn it on** and how it fits GSC/Bing/GA. Emitter implementation detail lives in `.ai/docs/plans/seo-aeo-uplift.md`.
 
-**Honest non-claim (shared):** IndexNow 200/202 = **receipt only**. It does not guarantee crawl, ranking, or ChatGPT/Perplexity citations.
+**Honest non-claim (shared):** IndexNow 200/202 = **receipt only**. It does not guarantee crawl, ranking, or ChatGPT/Perplexity citations. Same honesty applies to `llms.txt` / `llms-full.txt` / JSON-LD — **eligibility, not guarantees**.
 
 ---
 
@@ -50,7 +51,7 @@ implemented in the engine tree** (see IndexNow plan); **brands are not fully rol
 3. **Possible CF AI-crawler blocks (1h)** — Cloudflare defaults may 403 retrieval bots.
 4. **Verified GA4 bug in the naam *app*** (1g) — pageviews dropped unless user hits Generate.
 
-### Engine vs brand status (2026-07-17)
+### Engine vs brand status (2026-07-22)
 
 | Capability | Engine tree | Brands live |
 |------------|-------------|-------------|
@@ -59,6 +60,11 @@ implemented in the engine tree** (see IndexNow plan); **brands are not fully rol
 | IndexNow key file + twin sitemap inject | ✅ `glintIndexNow()` | ⬜ migrate + key |
 | Post-deploy `glint indexnow` | ✅ CLI | ⬜ cursor + host hook |
 | Doctor WARNs (GA / GSC / IndexNow) | ✅ | ⬜ after update |
+| `article:*` meta, Org/WebSite JSON-LD, FAQ/HowTo schema | 🟡 in progress (see uplift plan + §12 review) | ⬜ after package + layout PR |
+| `llms-full.txt`, robots `aiCrawlers`, RSS enrichment, JSON API | 🟡 templates in tree; not brand-rolled | ⬜ |
+| Sitemap `<lastmod>` | 🟡 `glintSitemapLastmod()` — mount path bugs remain | ⬜ register in brand `astro.config` |
+| Auto OG images / TOC anchors | 🔴 incomplete (generated but unwired / no heading ids) | ⬜ |
+| Google Indexing API (`glint index`) | 🔴 **wrong tool for blogs** — do not roll out (see §7, §12) | ❌ n/a |
 
 ### Expectation up front
 
@@ -211,12 +217,16 @@ Instrumentation makes results visible; this creates them.
 
 **3b.** Pillar → spoke + hub pages; related-posts graph.
 
-**3c.** FAQ/HowTo JSON-LD on post template (BLOG-SPEC roadmap).
+**3c.** FAQ/HowTo JSON-LD on post template — **[Engine: partial]** schema + template emission when
+frontmatter has `faq` / `howTo`. Brands need package update + post template parity. Content authors
+must actually fill frontmatter (agent `/draft` can suggest later).
 
 **3d.** After ~2–4 weeks GSC data: refresh pos 5–20 pages; bump `updatedAt`; internal links;
-`glint indexnow` for changed URLs.
+`glint indexnow` for changed URLs. Sitemap `<lastmod>` (uplift) helps re-crawl once wired correctly.
 
 **3e.** Directories, original data, communities, light PR, Organization/Person + sameAs.
+Organization JSON-LD is scaffolded in Base (prefer `site.logo` + `social` sameAs); Person author
+resolution from `team.json` still incomplete.
 
 ---
 
@@ -269,9 +279,14 @@ Autonomy must stay draft-first / PR-gated.
 - No unguarded GA on draft/noindex.  
 - No inventing baseline traffic numbers until 1g + 2a.  
 - Submit **`sitemap-index.xml`**, never bare `sitemap.xml`.  
-- Don't treat `llms.txt` or IndexNow as citation guarantees.  
+- Don't treat `llms.txt`, `llms-full.txt`, or IndexNow as citation guarantees.  
 - Don't default IndexNow to full historic sitemap or `HEAD~1` cursor.  
-- Don't claim `glint sync` alone rolls out Base.astro / IndexNow integration.
+- Don't claim `glint sync` alone rolls out Base.astro / IndexNow integration.  
+- **Don't use Google Web Search Indexing API for BlogPosting / general blog URLs.**  
+  Google documents the API for **JobPosting** and **BroadcastEvent** (in VideoObject) only.  
+  Engine WIP (`glint index` / `glint setup indexing`) must be gated, removed, or limited to those
+  content types — not marketed as “Google is 90% of search → push every post.” Use GSC sitemap +
+  URL Inspection + `<lastmod>` + quality content for Google.
 
 ---
 
@@ -291,8 +306,13 @@ Autonomy must stay draft-first / PR-gated.
 
 **Engine (measurement / content):**
 
-- `src/scaffold/theme/src/layouts/Base.astro.tmpl` — GA + verification  
-- Post template — FAQ/HowTo (3c, TODO)  
+- `src/scaffold/theme/src/layouts/Base.astro.tmpl` — GA + verification + Org JSON-LD + article meta  
+- Post template — FAQ/HowTo (3c, partial); TOC (broken anchors until rehype-slug); Person (not team-resolved)  
+- `src/integration/sitemap.ts` — `glintSitemapLastmod()` (mount bugs open)  
+- `src/integration/og-image.ts` — OG SVG gen (unwired to meta; resvg path broken)  
+- `src/lib/remark-links.ts` — `{{cta:}}` / `{{ref:}}` shortcodes  
+- `src/cli/commands/index.ts`, `setup.ts`, `src/lib/google-indexing.ts` — **do not brand-roll** (API scope)  
+- `.ai/docs/plans/seo-aeo-uplift.md` — engine emitter plan (status: in progress, not “done”)  
 - `docs/pipeline/plan.md`, CONTENT-PIPELINE — demand-driven (3a, TODO)  
 - `docs/MEASUREMENT.md` — TODO runbook  
 - `src/cli/commands/metrics.ts` — TODO Phase A  
@@ -326,11 +346,12 @@ Autonomy must stay draft-first / PR-gated.
 
 ## 10. Sequencing
 
-1. **Now / Week 1:** **1h** (CF bots) + **1g** (naam GA) + engine release if needed + **1f brand rollout** (analytics + IndexNow migrate) + **2a–2c**  
-2. **Week 1–2:** 2d–2e dashboard + citation tracker  
-3. **Week 2+:** WS3 in priority order (3a → 3c → 3d → 3b → 3e) + community/entity plays  
-4. **Week 4+:** metrics Phase A  
-5. **Parallel optional:** CF AI Search, api-catalog Worker  
+1. **Now / Week 1 (ops — still highest ROI):** **1h** (CF bots) + **1g** (naam GA) + **1f brand rollout** (analytics + IndexNow migrate) + **2a–2c** (GSC / Bing / GA). Do **not** block this on more engine emitters.  
+2. **Engine gate before next package release:** fix uplift blockers (TOC heading ids, OG `og:image` wiring or drop, lastmod mount paths + playground registration, gate/remove Google Indexing for blogs). See §12.  
+3. **Week 1–2:** 2d–2e dashboard + citation tracker  
+4. **Week 2+:** WS3 in priority order (3a → finish 3c content fill → 3d → 3b → 3e) + community/entity plays  
+5. **Week 4+:** metrics Phase A  
+6. **Parallel optional:** CF AI Search, api-catalog Worker — not Google Indexing for BlogPosting  
 
 ---
 
@@ -341,3 +362,92 @@ Autonomy must stay draft-first / PR-gated.
 | naam-blog | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | vijayatech-blog | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | zira-landing/blog | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+
+**Still the critical path.** Engine SEO/AEO surface without this board filled = still flying blind (§1 diagnosis unchanged).
+
+---
+
+## 12. Review — plan + code (2026-07-22)
+
+Review of `docs/ORGANIC-GROWTH-PLAN.md`, `.ai/docs/plans/seo-aeo-uplift.md`, and the uncommitted engine
+diff implementing the uplift. Full notes also live in the session review artifact; this section is
+the durable plan record.
+
+### 12.1 Verdict
+
+| Area | Verdict |
+|------|---------|
+| Organic plan (this doc) | **Sound** as strategy: measurement first, honest non-claims, brand vs engine split, IndexNow deferral. |
+| SEO/AEO uplift code | **Useful but incomplete** engine pass; must not ship as “organic growth done” or “implemented.” |
+| Sequencing | **Risk:** engine emitters expanded while brand board (§11) is still empty — opposite of Week-1 priority. |
+| Google Indexing path | **Block / rework** — wrong API for blogs (Google docs: JobPosting / BroadcastEvent only). |
+
+### 12.2 What the organic plan got right
+
+- Flying-blind diagnosis still dominates; instrumentation > more meta tags for 2–4 week wins.  
+- Clear “sync does not ship Base / IndexNow” rule.  
+- IndexNow = receipt only; no robots `llms:` field; submit `sitemap-index.xml` only.  
+- WS3 priority order (demand → FAQ → freshness → hubs → off-page) remains correct.  
+- Brand status board forces honesty about live readiness.
+
+### 12.3 What the uplift work advanced (engine tree only)
+
+| Item | Status after review |
+|------|---------------------|
+| `llms-full.txt` + link from `llms.txt` | Templates present; size guard; uses `publicPosts` (newest first) |
+| `article:*` meta | Wired in Base + post templates |
+| Organization JSON-LD | Present; logo uses favicon not `site.logo` (fix) |
+| FAQ/HowTo schema + JSON-LD | Schema + emission when frontmatter set (3c partial) |
+| WebSite + SearchAction | Index templates |
+| robots `aiCrawlers` | Template + doctor WARN if unset |
+| RSS author/categories/`content` | Present; `content` is markdown not HTML |
+| Per-post `/api/blog/<slug>.json` | Templates present |
+| remark `{{cta:}}` / `{{ref:}}` | Plugin + doctor broken-ref WARN |
+| Doctor: social / googleIndexing / aiCrawlers | WARNs added |
+| Sitemap lastmod | Integration exists; **mount path matching broken**; playground not registered |
+| TOC | Nav rendered; **heading `id`s not injected** (dead anchors) |
+| OG images | SVG written at build; **not set as `og:image`**; resvg API wrong |
+| `glint index` / `setup indexing` | Code present; **do not brand-roll** (API scope) |
+
+### 12.4 Issues (actionable)
+
+**Bugs (fix before release)**
+
+1. **Google Indexing API for blogs** — `src/lib/google-indexing.ts`, CLI, setup, doctor WARN, uplift plan §2.6. Google documents the API for JobPosting / BroadcastEvent only. Gate, remove, or limit; update all docs so owners are not guided into a dead path.  
+2. **TOC without heading ids** — post templates link `#slug` but no `rehype-slug` (or equivalent). Use `extractHeadings` from `src/lib/content.ts` consistently.  
+3. **OG unwired** — `glintOgImage()` does not feed Base `og:image`; optional PNG conversion uses wrong `@resvg/resvg-js` API.  
+4. **Playground missing `glintSitemapLastmod()`** — cannot verify lastmod success criterion.  
+5. **lastmod mount paths** — map keys `/${collection}/${slug}/` miss Astro `base` and flat mounted slugs.
+
+**Suggestions**
+
+6. Setup guide: GSC property Owner for SA email, not GCP project Owner.  
+7. Organization logo: prefer `site.logo \|\| site.favicon`.  
+8. Resolve author Person from `team.json`, not raw frontmatter id.  
+9. Normalize `links.json` keys to lowercase on load (lookup already lowercases).  
+10. RSS: HTML for `content:encoded` or document markdown choice.  
+11. Unit tests for lastmod, remark-links, extractHeadings, pure indexing helpers.  
+12. Uplift plan status → **in progress** (not “implemented”); keep this brand board empty until true.  
+13. Prefer brand 1f/2a–2c over more engine surface for next calendar week.
+
+**Nits**
+
+14. Soften “maximises citation potential” comments on llms-full (eligibility only).  
+15. Scaffold `aiCrawlers: "all"` means doctor never nudges “conscious choice” on greenfield.
+
+### 12.5 Plan corrections applied in this revision
+
+- Linked SEO/AEO uplift plan; clarified overlap and Google Indexing non-goal (§0, §7).  
+- Engine vs brand table expanded for uplift surfaces (2026-07-22).  
+- 3c / 3e marked partial where code exists.  
+- Critical files list updated; sequencing prioritizes ops + engine gate before release.  
+- Explicit: brand board still critical path; uplift ≠ organic done.
+
+### 12.6 Recommended next steps (ordered)
+
+1. Fix uplift blockers (TOC, OG wire-or-drop, lastmod + playground, Google Index gate/remove).  
+2. Release engine only after those gates; brands `pnpm update` + layout/config PRs.  
+3. **1h → 1f → 2a–2c** on all three brands (still Week 1).  
+4. `docs/MEASUREMENT.md` + Looker (WS2).  
+5. Demand-driven 3a + author FAQ frontmatter (finish 3c in content).  
+6. Only then: Phase A metrics / refresh loop.

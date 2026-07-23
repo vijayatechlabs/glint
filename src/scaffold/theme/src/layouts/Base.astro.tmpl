@@ -13,12 +13,35 @@ interface Props {
   image?: string;
   noindex?: boolean;
   jsonLd?: Record<string, unknown> | unknown[];
+  /** Open Graph article protocol meta (only on post pages). */
+  articleMeta?: {
+    publishedTime: string;
+    modifiedTime: string;
+    author?: string;
+    tags?: string[];
+    section?: string;
+  };
 }
-const { title, description, canonical, markdownAlternate, image, noindex, jsonLd } = Astro.props;
+const { title, description, canonical, markdownAlternate, image, noindex, jsonLd, articleMeta } = Astro.props;
 const canon = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = image ? new URL(image, Astro.site).href : undefined;
 // Strip trailing slash so we can safely append asset paths.
 const siteBase = site.baseUrl.replace(/\/?$/, "");
+
+// Organization JSON-LD — site-level entity signal (E-E-A-T).
+const sameAs = "social" in site && site.social && typeof site.social === "object" && !Array.isArray(site.social)
+  ? Object.values(site.social as Record<string, string>).filter(Boolean)
+  : Array.isArray(site.social)
+    ? (site.social as string[]).filter(Boolean)
+    : [];
+const orgSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: site.brand,
+  url: `https://${site.domain}`,
+  ...((site.logo || site.favicon) ? { logo: new URL(site.logo || site.favicon, Astro.site).href } : {}),
+  ...(sameAs.length > 0 ? { sameAs } : {}),
+};
 ---
 
 <!doctype html>
@@ -39,7 +62,15 @@ const siteBase = site.baseUrl.replace(/\/?$/, "");
     {ogImage && <meta property="og:image" content={ogImage} />}
     <meta name="twitter:card" content="summary_large_image" />
 
+    {/* Open Graph article protocol — freshness + attribution signals for search & AI engines. */}
+    {articleMeta && <meta property="article:published_time" content={articleMeta.publishedTime} />}
+    {articleMeta && <meta property="article:modified_time" content={articleMeta.modifiedTime} />}
+    {articleMeta?.author && <meta property="article:author" content={articleMeta.author} />}
+    {articleMeta?.tags?.map((tag) => <meta property="article:tag" content={tag} />)}
+    {articleMeta?.section && <meta property="article:section" content={articleMeta.section} />}
+
     <link rel="alternate" type="application/rss+xml" title="RSS" href={new URL("/rss.xml", Astro.site).href} />
+    <link rel="alternate" type="text/plain" title="llms-full" href={new URL("/llms-full.txt", Astro.site).href} />
     {markdownAlternate && (
       <link rel="alternate" type="text/markdown" href={markdownAlternate} />
     )}
@@ -52,6 +83,7 @@ const siteBase = site.baseUrl.replace(/\/?$/, "");
          at a sub-path (e.g. domain.com/blog). Regenerate with `glint theme pull`. -->
     <link rel="stylesheet" href={`${siteBase}/theme.css`} />
     <link rel="stylesheet" href={`${siteBase}/custom.css`} />
+    <script type="application/ld+json" set:html={JSON.stringify(orgSchema)} />
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
 
     {/* Google Search Console + Bing Webmaster verification meta tags.

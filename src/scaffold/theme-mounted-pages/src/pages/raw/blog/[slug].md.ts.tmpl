@@ -1,8 +1,10 @@
 import type { APIContext } from "astro";
+import { markdownTwinResponse } from "@vijayatech/glint";
 import { publicPosts } from "../../../posts";
 import { site } from "../../../../data/site.config";
 
-// AEO: markdown twins — raw body at /raw/blog/<slug>.md (under site base)
+// AEO: markdown twins at /raw/blog/<slug>.md under site base (markdownTwinResponse).
+// Content negotiation (Accept / bot UA) is edge-only — see docs/AEO.md.
 export async function getStaticPaths() {
   const posts = await publicPosts();
   return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
@@ -13,11 +15,5 @@ export async function GET({ props }: APIContext) {
   const base = site.baseUrl.replace(/\/$/, "");
   const htmlUrl = `${base}/${post.id}/`;
 
-  return new Response(post.body, {
-    headers: {
-      "Content-Type": "text/plain; charset=utf-8",
-      "Content-Disposition": "inline",
-      Link: `<${htmlUrl}>; rel="canonical"`,
-    },
-  });
+  return markdownTwinResponse(post.body ?? "", { htmlUrl });
 }

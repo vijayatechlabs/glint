@@ -1,7 +1,10 @@
 # Getting Started with Glint
 
-The front door. Works the same in **any** agent — Claude Code, Google Antigravity
-(Gemini), Codex, Cursor — or a plain terminal.
+The front door for **developers, freelancers, and agencies** who want git-native
+content and blogs next to their website, app, or product — without leaving the IDE.
+
+Works the same in **any** agent — Claude Code, Google Antigravity (Gemini), Codex,
+Cursor — or a plain terminal.
 
 ## The one idea
 
@@ -143,6 +146,10 @@ glint import wordpress --wxr export.xml --out ./acme-blog
 ---
 
 ## 5. Pulling Glint updates into a project
+
+**Brand upgrade checklist (humans + agents):** after each engine release, follow
+**[`docs/UPGRADE.md`](UPGRADE.md)** — package update, `glint sync`, template ports,
+doctor, verify. Doctor does **not** pull code; sync does **not** overwrite forked pages.
 
 Glint is the shared engine; brand sites consume it. Updates reach a site in two
 different ways depending on the part:

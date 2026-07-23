@@ -94,3 +94,17 @@ IndexNow URL submission is split into two phases: (1) build-time generation (the
 - **Why**: Triggering the HTTP submit requests during Astro build-time causes search engines to immediately query the site for the verification key file. Since the site has not yet been deployed or uploaded to the CDN/VPS (e.g. Cloudflare Pages or Coolify), they encounter a 404 error and reject the submission. Moving the HTTP submit to a post-deploy step prevents this race condition.
 - **Durable Cursor**: The post-deploy command compares the current commit SHA with a durable commit cursor (`--since-sha`) stored in the deploy environment to submit only added, modified, or deleted URLs, preventing spamming search engines with historical sitemap pings.
 
+
+---
+
+## 2026-07-23
+
+**Decision 13 — AEO: static in engine, negotiation at brand edge (human-gated)**
+
+- **Audience:** open-source framework for developers, freelancers, and agencies — rich content and blogs managed in git/IDE next to website, app, or project context. Not a hosted CMS.
+- **In framework:** markdown twin response headers + helpers (`markdownTwinResponse`), `llms.txt` / twins / schema — pure static, zero runtime, no third-party AEO package dependencies.
+- **Out of framework:** Accept / bot-UA content negotiation, optional public `.md` URL rewrite, HTTP `Link` + HTML `Vary` on HTML responses — require edge compute when a brand wants them.
+- **Why:** Glint’s contract is static-output and host-agnostic. A required Worker would break that contract.
+- **Agent protocol:** `docs/AEO.md` (synced to brands). Agents implement static AEO freely; **must ask humans before** deploying edge workers or changing CDN routes.
+- **Origin path stays** `/raw/blog/<slug>.md`; optional public `/blog/<slug>.md` is brand edge mapping only (plan: `.ai/docs/plans/aeo-edge-worker.md`).
+- **Docs policy:** do not name or promote external AEO products in user/agent docs; describe Glint’s own behaviour and opt-in edge notes only.

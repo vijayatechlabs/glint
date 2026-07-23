@@ -1,6 +1,7 @@
 import rss from "@astrojs/rss";
+import { markdownToHtmlBasic } from "@vijayatech/glint";
 import { site } from "../../data/site.config";
-import { publicPosts } from "../posts";
+import { publicPosts, resolveAuthor } from "../posts";
 
 export async function GET(context) {
   const posts = await publicPosts();
@@ -8,11 +9,20 @@ export async function GET(context) {
     title: site.brand,
     description: site.seo.defaultDescription || `${site.brand} blog`,
     site: context.site,
-    items: posts.map((p) => ({
-      title: p.data.title,
-      description: p.data.summary,
-      pubDate: p.data.publishedAt,
-      link: `/blog/${p.id}/`,
-    })),
+    items: posts.map((p) => {
+      const author = p.data.author ? resolveAuthor(p.data.author) : undefined;
+      return {
+        title: p.data.title,
+        description: p.data.summary,
+        pubDate: p.data.publishedAt,
+        link: `/blog/${p.id}/`,
+        content: markdownToHtmlBasic(p.body ?? ""),
+        ...(author ? { author: `${author.name}${author.url ? ` (${author.url})` : ""}` } : {}),
+        categories: [
+          ...(p.data.category ? [p.data.category] : []),
+          ...p.data.tags,
+        ],
+      };
+    }),
   });
 }

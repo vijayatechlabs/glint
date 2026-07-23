@@ -27,4 +27,5 @@ export const site = {
     key: "",
     keyPath: "root",
   },
+  aiCrawlers: "all" as "all" | "retrieval-only" | "none",
 } as const;

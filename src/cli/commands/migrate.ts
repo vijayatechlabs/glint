@@ -284,8 +284,19 @@ ${install}
 `;
 }
 
-/** Patch known twin route templates / site files for headers + canonical Link. */
+/**
+ * Patch twin routes toward Glint AEO headers.
+ * Prefer `markdownTwinResponse` from `@vijayatech/glint`. Never downgrade
+ * text/markdown → text/plain.
+ */
 function patchTwinRoutes(dir: string, dryRun: boolean): void {
+  const markers = [
+    "text/markdown",
+    "X-Markdown-Tokens",
+    "X-Robots-Tag",
+    "X-AEO-Version",
+    "X-Content-Type-Options",
+  ];
   const candidates = [
     "src/pages/raw/blog/[slug].md.ts",
     "src/pages/raw/blog/[slug].md.js",
@@ -294,38 +305,41 @@ function patchTwinRoutes(dir: string, dryRun: boolean): void {
     const p = join(dir, rel);
     if (!existsSync(p)) continue;
     const src = readFileSync(p, "utf8");
-    if (src.includes("Content-Disposition") && src.includes('rel="canonical"')) {
-      console.log(`Twin route already patched: ${rel}`);
+
+    if (src.includes("markdownTwinResponse") || src.includes("markdownTwinHeaders")) {
+      console.log(`Twin route uses Glint AEO helper: ${rel}`);
       continue;
     }
-    // Best-effort: only rewrite simple GET Response patterns
-    if (!src.includes("new Response") || !src.includes("Content-Type")) {
-      console.warn(`Skip twin patch (unrecognized shape): ${rel}`);
+
+    const missing = markers.filter((m) => !src.includes(m));
+    if (missing.length === 0 && src.includes('rel="canonical"')) {
+      console.log(`Twin route already has AEO headers: ${rel}`);
       continue;
     }
-    console.warn(
-      `Twin route ${rel}: ensure headers text/plain + Content-Disposition: inline + Link canonical. ` +
-        `See engine template raw/blog/[slug].md.ts.tmpl — re-copy manually if customized.`,
-    );
-    if (!dryRun && src.includes('text/markdown')) {
-      let next = src.replace(
-        /["']Content-Type["']\s*:\s*["']text\/markdown[^"']*["']/,
-        '"Content-Type": "text/plain; charset=utf-8"',
+
+    // Best-effort: upgrade text/plain → text/markdown on simple Response shapes
+    let next = src;
+    if (next.includes("text/plain")) {
+      next = next.replace(
+        /["']Content-Type["']\s*:\s*["']text\/plain[^"']*["']/,
+        '"Content-Type": "text/markdown; charset=utf-8"',
       );
-      if (!next.includes("Content-Disposition")) {
-        next = next.replace(
-          /headers:\s*\{\s*["']Content-Type["']:\s*["']text\/plain; charset=utf-8["']\s*\}/,
-          `headers: {
-    "Content-Type": "text/plain; charset=utf-8",
-    "Content-Disposition": "inline",
-    // Link canonical to HTML set at runtime when possible
-  }`,
-        );
-      }
-      if (next !== src) {
-        writeFileSync(p, next, "utf8");
-        console.log(`Patched twin headers: ${rel}`);
-      }
+    }
+
+    if (next !== src && !dryRun) {
+      writeFileSync(p, next, "utf8");
+      console.log(`Upgraded twin Content-Type to text/markdown: ${rel}`);
+    } else if (next !== src && dryRun) {
+      console.log(`Would upgrade twin Content-Type to text/markdown: ${rel}`);
+    }
+
+    const stillMissing = markers.filter((m) => !next.includes(m));
+    if (stillMissing.length > 0) {
+      console.warn(
+        `Twin route ${rel}: missing AEO headers (${stillMissing.join(", ")}). ` +
+          `Prefer: import { markdownTwinResponse } from "@vijayatech/glint" ` +
+          `(see engine template raw/blog/[slug].md.ts.tmpl and docs/AEO.md).`,
+      );
     }
   }
 }

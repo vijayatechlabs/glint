@@ -1,8 +1,9 @@
 ---
 import { render } from "astro:content";
+import { extractHeadings } from "@vijayatech/glint";
 import Base from "../layouts/Base.astro";
 import { site } from "../../data/site.config";
-import { pagePosts, publicPosts, relatedTo } from "../posts";
+import { pagePosts, publicPosts, relatedTo, resolveAuthor } from "../posts";
 
 export async function getStaticPaths() {
   const posts = await pagePosts();
@@ -19,6 +20,25 @@ const words = post.body?.trim().split(/\s+/).length ?? 0;
 const readingTime = Math.max(1, Math.round(words / 200));
 const related = relatedTo(post, await publicPosts());
 
+// Author entity for JSON-LD (E-E-A-T). Resolves personId → data/team.json.
+const authorResolved = post.data.author ? resolveAuthor(post.data.author) : undefined;
+const authorPerson = authorResolved
+  ? {
+      "@type": "Person" as const,
+      name: authorResolved.name,
+      ...(authorResolved.url ? { url: authorResolved.url } : {}),
+    }
+  : undefined;
+
+// Article protocol meta — freshness + attribution signals for search & AI engines.
+const articleMeta = {
+  publishedTime: post.data.publishedAt.toISOString(),
+  modifiedTime: (post.data.updatedAt ?? post.data.publishedAt).toISOString(),
+  ...(authorResolved ? { author: authorResolved.name } : {}),
+  ...(post.data.tags.length > 0 ? { tags: post.data.tags as string[] } : {}),
+  ...(post.data.category ? { section: post.data.category } : {}),
+};
+
 const blogPosting = {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
@@ -28,6 +48,7 @@ const blogPosting = {
   dateModified: (post.data.updatedAt ?? post.data.publishedAt).toISOString(),
   mainEntityOfPage: url,
   ...(post.data.cover ? { image: new URL(post.data.cover.src, Astro.site).href } : {}),
+  ...(authorPerson ? { author: authorPerson } : {}),
 };
 const breadcrumb = {
   "@context": "https://schema.org",
@@ -38,6 +59,42 @@ const breadcrumb = {
     { "@type": "ListItem", position: 2, name: post.data.title, item: url },
   ],
 };
+
+// FAQ JSON-LD — featured snippets + AI answers (optional per-post opt-in).
+const faqSchema = post.data.faq && post.data.faq.length > 0
+  ? {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: post.data.faq.map((f: { q: string; a: string }) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    }
+  : null;
+
+// HowTo JSON-LD — step-by-step rich results (optional per-post opt-in).
+const howToSchema = post.data.howTo
+  ? {
+      "@context": "https://schema.org",
+      "@type": "HowTo",
+      name: post.data.howTo.name,
+      ...(post.data.howTo.totalTime ? { totalTime: post.data.howTo.totalTime } : {}),
+      step: post.data.howTo.steps.map((s: { name: string; text: string; url?: string }, i: number) => ({
+        "@type": "HowToStep",
+        position: i + 1,
+        name: s.name,
+        text: s.text,
+        ...(s.url ? { url: s.url } : {}),
+      })),
+    }
+  : null;
+
+// Collect all JSON-LD blocks into one array.
+const allJsonLd = [blogPosting, breadcrumb, ...(faqSchema ? [faqSchema] : []), ...(howToSchema ? [howToSchema] : [])];
+
+// TOC — IDs match rehypeHeadingIds on rendered HTML.
+const toc = extractHeadings(post.body ?? "");
 ---
 
 <Base
@@ -45,9 +102,10 @@ const breadcrumb = {
   description={post.data.summary}
   canonical={url}
   markdownAlternate={markdownAlternate}
-  image={post.data.cover?.src}
+  image={post.data.cover?.src ?? `${base}og/${post.id}.svg`}
   noindex={post.data.draft}
-  jsonLd={[blogPosting, breadcrumb]}
+  jsonLd={allJsonLd}
+  articleMeta={articleMeta}
 >
   {post.data.draft && <p><strong>⚠ DRAFT — not published (preview only)</strong></p>}
   <article data-pagefind-body>
@@ -59,6 +117,18 @@ const breadcrumb = {
       · {readingTime} min read
       {post.data.category && <> · <a href={`${base}category/${post.data.category}/`}>{post.data.category}</a></>}
     </p>
+    {toc.length >= 3 && (
+      <nav class="toc" aria-label="Table of contents">
+        <h2>Contents</h2>
+        <ul>
+          {toc.map((h: { depth: number; text: string; id: string }) => (
+            <li style={`margin-left: ${(h.depth - 2) * 1}em`}>
+              <a href={`#${h.id}`}>{h.text}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )}
     <Content />
     {post.data.tags.length > 0 && (
       <p class="tags">

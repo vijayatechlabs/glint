@@ -1,7 +1,7 @@
 {
   "name": "@vijayatech/glint",
   "version": "0.2.0",
-  "description": "The lightning publishing engine for the AI era — git-native, static-output, agent-first, SEO/AEO-native.",
+  "description": "Open-source git-native publishing for developers, freelancers, and agencies — static-output, agent-first, SEO/AEO-native blogs next to your product.",
   "type": "module",
   "license": "MIT",
   "private": false,
@@ -22,7 +22,7 @@
     "prepare": "tsup",
     "glint": "tsx src/cli/index.ts",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test src/lib/indexnow.test.ts"
+    "test": "tsx --test src/lib/*.test.ts src/integration/*.test.ts"
   },
   "keywords": ["astro", "static-site", "publishing", "aeo", "seo", "agent", "git-native"],
   "dependencies": {

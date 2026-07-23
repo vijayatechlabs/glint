@@ -56,6 +56,19 @@ const base = z.object({
   cover: imageRef.optional(),
   images: z.array(imageRef).default([]),
   seo,
+  // FAQ + HowTo structured data (optional, per-post opt-in).
+  // When present the post template emits FAQPage / HowTo JSON-LD
+  // alongside BlogPosting, enabling featured snippets + AI answers.
+  faq: z.array(z.object({ q: z.string().min(1), a: z.string().min(1) })).optional(),
+  howTo: z.object({
+    name: z.string().min(1),
+    steps: z.array(z.object({
+      name: z.string().min(1),
+      text: z.string().min(1),
+      url: z.string().url().optional(),
+    })),
+    totalTime: z.string().optional(), // ISO 8601 duration, e.g. "PT15M"
+  }).optional(),
 });
 
 export const blog = base;

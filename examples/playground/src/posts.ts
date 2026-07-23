@@ -1,7 +1,44 @@
 import { getCollection, type CollectionEntry } from "astro:content";
+import { readFileSync, existsSync } from "node:fs";
+import { join } from "node:path";
 
 const byNewest = (a: CollectionEntry<"blog">, b: CollectionEntry<"blog">) =>
   b.data.publishedAt.getTime() - a.data.publishedAt.getTime();
+
+// ── Team / author resolution (E-E-A-T) ─────────────────────────────────────
+
+interface TeamMember {
+  id: string;
+  name: string;
+  url?: string;
+  role?: string;
+}
+
+let _teamCache: Map<string, TeamMember> | null = null;
+
+function loadTeam(): Map<string, TeamMember> {
+  if (_teamCache) return _teamCache;
+  const map = new Map<string, TeamMember>();
+  try {
+    const p = join(process.cwd(), "data", "team.json");
+    if (existsSync(p)) {
+      const raw = JSON.parse(readFileSync(p, "utf8")) as TeamMember[];
+      for (const m of raw) map.set(m.id.toLowerCase(), m);
+    }
+  } catch {
+    /* malformed team.json — fall back to personId */
+  }
+  _teamCache = map;
+  return map;
+}
+
+/** Resolve an author personId to { name, url }. Falls back to the id itself. */
+export function resolveAuthor(personId: string): { name: string; url?: string } {
+  const team = loadTeam();
+  const member = team.get(personId.toLowerCase());
+  if (member) return { name: member.name, ...(member.url ? { url: member.url } : {}) };
+  return { name: personId };
+}
 
 /** Pages: dev/preview shows drafts; production hides drafts + future-dated posts. */
 export async function pagePosts(): Promise<CollectionEntry<"blog">[]> {

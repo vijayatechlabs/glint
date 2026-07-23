@@ -4,9 +4,21 @@ import { site } from "../../data/site.config";
 import { pagePosts } from "../posts";
 const posts = await pagePosts();
 const description = site.seo.defaultDescription || `${site.brand} blog`;
+
+const webSiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: site.brand,
+  url: `https://${site.domain}`,
+  potentialAction: {
+    "@type": "SearchAction",
+    target: new URL("/blog/search?q={search_term_string}", Astro.site).href,
+    "query-input": "required name=search_term_string",
+  },
+};
 ---
 
-<Base title={site.brand} description={description}>
+<Base title={site.brand} description={description} jsonLd={webSiteSchema}>
   <h1>{site.brand}</h1>
   <ul>
     {
