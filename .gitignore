@@ -17,3 +17,7 @@ dist/
 *.log
 .vscode/
 .idea/
+
+.mcp.json
+.cursor/
+.grok/

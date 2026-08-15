@@ -68,11 +68,21 @@ Headers (via `markdownTwinResponse`):
 
 Also automatic:
 
-- HTML `<link rel="alternate" type="text/markdown">`
+- HTML `<link rel="alternate" type="text/markdown">` (markdown twin)
+- HTML `<link rel="describedby" href="...">` pointing to covering `llms.txt` (llms.txt v2)
 - `llms.txt` / `llms-full.txt` (size-guarded full feed — must include real bodies, not a clone of the index)
 - Twin URLs injected into **sitemap** at lower priority (`glintSitemapLastmod` / IndexNow inject)
 - `robots.txt` from `site.aiCrawlers` (`all` | `retrieval-only` | `none`)
 - JSON-LD, RSS, IndexNow key file at build; HTTP notify **post-deploy**
+
+### llms.txt v2 (August 2026)
+
+v2 answers the question coding agents actually have: **given this page, where is the markdown and which llms.txt covers it?**
+
+Glint emits the two v2 pieces automatically on post pages (`Base.astro`):
+
+1. `<link rel="alternate" type="text/markdown" href="/raw/blog/<slug>.md">` — the page's markdown twin.
+2. `<link rel="describedby" href="/llms.txt">` (or `${base}llms.txt` when mounted) — the covering index.
 
 ### AI crawler modes (`aiCrawlers`)
 

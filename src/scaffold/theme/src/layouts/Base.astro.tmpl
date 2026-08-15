@@ -8,8 +8,10 @@ interface Props {
   title: string;
   description: string;
   canonical?: string;
-  /** Absolute URL of markdown twin when present (AEO §8.4.1). */
+  /** Absolute URL of markdown twin when present (AEO §8.4.1 / llms.txt v2 rel=alternate). */
   markdownAlternate?: string;
+  /** Absolute URL of the covering llms.txt index (llms.txt v2 rel=describedby). */
+  describedBy?: string;
   image?: string;
   noindex?: boolean;
   jsonLd?: Record<string, unknown> | unknown[];
@@ -22,7 +24,7 @@ interface Props {
     section?: string;
   };
 }
-const { title, description, canonical, markdownAlternate, image, noindex, jsonLd, articleMeta } = Astro.props;
+const { title, description, canonical, markdownAlternate, describedBy, image, noindex, jsonLd, articleMeta } = Astro.props;
 const canon = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = image ? new URL(image, Astro.site).href : undefined;
 // Strip trailing slash so we can safely append asset paths.
@@ -73,6 +75,10 @@ const orgSchema = {
     <link rel="alternate" type="text/plain" title="llms-full" href={new URL("/llms-full.txt", Astro.site).href} />
     {markdownAlternate && (
       <link rel="alternate" type="text/markdown" href={markdownAlternate} />
+    )}
+    {/* llms.txt v2: tells an agent which llms.txt covers this page (B2A nav file). */}
+    {describedBy && (
+      <link rel="describedby" href={describedBy} />
     )}
 
     {/* Brand favicon (set `favicon` in site.config). siteBase keeps it correct

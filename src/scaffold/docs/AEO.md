@@ -15,6 +15,7 @@ product site/landing. Shared goal: SEO + AI citation **eligibility** (not guaran
 |---|---|
 | Markdown twin | `/raw/blog/<slug>.md` with AEO response headers |
 | HTML alternate | `<link rel="alternate" type="text/markdown">` on post pages |
+| Covering index | `<link rel="describedby" href="/llms.txt">` (`/blog/llms.txt` when mounted) (llms.txt v2) |
 | AI index | `/llms.txt`, `/llms-full.txt` (full must include real post bodies) |
 | Sitemap | HTML + twin URLs (lower priority) via `glintSitemapLastmod` |
 | Crawler policy | `robots.txt` from `aiCrawlers`: `all` \| `retrieval-only` \| `none` |
@@ -27,6 +28,30 @@ curl -sI https://<this-domain>/raw/blog/<slug>.md | grep -iE \
 ```
 
 `glint doctor` warns if twins/llms/Bing verification look weak.
+
+---
+
+## llms.txt v2 (August 2026)
+
+v2 answers the question coding agents actually have: **given this page, where is
+the markdown and which llms.txt covers it?** Google Search still ignores the file;
+Chrome Lighthouse now audits it (`agentic browsing`), and OpenAI/Anthropic/Gemini
+publish their own. Treat it as a **B2A nav file**, not a ranking lever.
+
+Glint emits the two v2 pieces automatically on post pages (`Base.astro`):
+
+1. `<link rel="alternate" type="text/markdown" href="/raw/blog/<slug>.md">` — the
+   page's markdown twin (extension-replace form; twin already ships).
+2. `<link rel="describedby" href="/llms.txt">` (or `${base}llms.txt` when mounted) — the covering index
+   (most-specific wins for subpath docs like `/docs/llms.txt` → `/docs/`).
+
+Optional HTTP equivalent — `Link:` headers (`rel=alternate; type=text/markdown`,
+`rel=describedby`) via CDN/edge middleware when a static `<link>` tag is not
+enough (per-page URLs mean a static `_headers`/`vercel.json` rule can't express
+it — use a small edge function instead).
+
+Keep llms.txt **on docs/product paths only**; do not treat it as a homepage SEO
+feature. Homepages stay on the definitional opener + Organization `sameAs` work.
 
 ---
 
