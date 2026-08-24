@@ -28,14 +28,15 @@ Compare brand files to engine templates under `node_modules/@vijayatech/glint` (
 |---|---|
 | `src/pages/raw/blog/[slug].md.ts` | `import { markdownTwinResponse } from "@vijayatech/glint"` and return that Response |
 | `src/pages/blog/[slug].astro` or `src/pages/[slug].astro` | `extractHeadings` for TOC; Person via `resolveAuthor`; `articleMeta` with resolved name; OG fallback `/og/{slug}.svg` |
-| `src/layouts/Base.astro` | Organization JSON-LD (`logo \|\| favicon`); article meta props; optional `llms-full` alternate link |
+| `src/layouts/Base.astro` | Organization JSON-LD (`logo || favicon`); article meta props; optional `llms-full` alternate link; Preferred Sources `publisher.js` when enabled |
+| `src/components/Footer.astro` / `PreferredSources.astro` | Official Preferred Sources button + host deeplink |
 | `src/pages/rss.xml.js` | `markdownToHtmlBasic` for `content`; author from `resolveAuthor` |
 | `src/pages/llms-full.txt.ts` | Add if missing; keep size guard |
 | `src/pages/llms.txt.ts` | Link to `llms-full.txt` |
 | `src/pages/api/blog/[slug].json.ts` | Add if missing (per-post JSON API) |
 | `astro.config.*` | `glintSitemapLastmod()`, `glintOgImage()`, `remarkResolveLinks(…)`, `rehypeHeadingIds()` |
 | `src/posts.ts` | `resolveAuthor` + case-insensitive `team.json` ids |
-| `data/site.config.ts` | Explicit `aiCrawlers`, optional `social` / `logo` |
+| `data/site.config.ts` | Explicit `aiCrawlers`, optional `social` / `logo`, `preferredSources` |
 | `data/team.json` | Real authors (`id`, `name`, `url?`) for E-E-A-T |
 
 If the brand never customized a file, copying the latest `.tmpl` (strip `.tmpl`) is fine. If customized, **merge by hand** — do not blindly overwrite brand chrome/CSS.
@@ -47,6 +48,7 @@ If the brand never customized a file, copying the latest `.tmpl` (strip `.tmpl`)
 | Field | Action |
 |---|---|
 | `aiCrawlers` | Set explicitly: `"all"` \| `"retrieval-only"` \| `"none"` (retrieval-only allows answer bots, blocks training scrapers) |
+| `preferredSources` | Keep `enabled: true` unless you opt out. Port `PreferredSources.astro` + `publisher.js` in `Base.astro`. Domain/subdomain only. |
 | `social` / `logo` | Fill for Organization JSON-LD |
 | `verification.google` | GSC meta or DNS |
 | `verification.bing` | Bing Webmaster — matters for AI-adjacent / IndexNow paths |

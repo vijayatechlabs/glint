@@ -1,0 +1,45 @@
+---
+/**
+ * Google Preferred Sources button (Search Central, last updated 2026-08-20).
+ * Adds the current *host* and returns the reader to this page.
+ * A subdirectory mount is not its own source — the deeplink still uses the host.
+ */
+import { site } from "../../data/site.config";
+import {
+  preferredSourceHost,
+  preferredSourcesEnabled,
+} from "@vijayatech/glint";
+
+type PreferredCfg = {
+  enabled?: boolean;
+  theme?: "light" | "dark";
+  lang?: string;
+};
+
+const cfg = (site as { preferredSources?: PreferredCfg }).preferredSources;
+const enabled = preferredSourcesEnabled(cfg);
+const theme = cfg?.theme === "dark" ? "dark" : "light";
+const lang = cfg?.lang ?? "";
+const info = preferredSourceHost(site.domain || site.baseUrl);
+---
+
+{enabled && (
+  <section class="glint-preferred-sources" data-glint-preferred-sources>
+    <p class="glint-preferred-sources__label">
+      Prefer this source in Google Search (Top Stories, AI Overviews, AI Mode).
+    </p>
+    <div class="glint-preferred-sources__row">
+      {lang ? (
+        <div google-add-preferred-source-btn data-theme={theme} data-lang={lang}></div>
+      ) : (
+        <div google-add-preferred-source-btn data-theme={theme}></div>
+      )}
+      <a href={info.deeplink}>Add {info.host} as a Preferred Source</a>
+    </div>
+    {!info.pathIsDistinctSource && (
+      <p class="glint-preferred-sources__note">
+        Google accepts the host, not a subdirectory. This adds {info.host}.
+      </p>
+    )}
+  </section>
+)}

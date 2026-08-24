@@ -99,6 +99,28 @@ Set explicitly in `site.config.ts`. Revisit bot lists when major crawlers change
 - **GSC** + **Bing Webmaster** — first-class
 - **GA4** — organic + optional AI referral events (see OpenStart `nextjs-analytics.ts` pattern; adapt for blog if needed)
 - IndexNow 200/202 = **receipt only**
+- **Preferred Sources button** = a reader signal for Top Stories / AI Mode / AI Overviews, **not** a citation KPI
+- Do **not** use Ahrefs AI-adjusted volume as an AEO KPI
+- Do **not** treat a GSC Generative AI logging gap (e.g. 13–17 Aug 2026) as lost AIO
+
+---
+
+## 3b. Preferred Sources button (August 2026)
+
+Google Search Central last updated the publisher button on **2026-08-20 UTC**. The official script adds the current **host** and returns the reader to the page (not to Google’s prefs tool).
+
+| Rule | What Glint does |
+|---|---|
+| Standard JS (recommended) | `Base.astro` loads `https://news.google.com/swg/js/v1/publisher.js`; footer renders `<div google-add-preferred-source-btn>` |
+| Domain / subdomain only | Helper `preferredSourceHost()`; a `/blog` mount is **not** its own source — the button still adds the host |
+| Deeplink fallback | `https://www.google.com/preferences/source?q=<host>` next to the button |
+| Opt-out | `preferredSources.enabled: false` in `data/site.config.ts` |
+
+**Not eligible as its own source:** a product page at `example.com/glint` or a blog at `example.com/blog`. Confirm the host in [Google’s source preferences tool](https://www.google.com/preferences/source) before treating the button as live.
+
+Do **not** ship hidden “recommend this brand” strings. Google’s spam policies (last updated 2026-05-15) cover manipulating generative AI responses.
+
+`glint doctor` WARNs when published posts exist and the config/button is missing.
 
 ---
 

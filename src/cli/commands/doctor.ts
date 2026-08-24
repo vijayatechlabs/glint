@@ -257,6 +257,47 @@ export async function runDoctor(args: string[]): Promise<void> {
         );
       }
 
+      // Google Preferred Sources (Search Central 2026-08-20). Domain/subdomain only.
+      const psBlock = configText.match(/preferredSources\s*:\s*\{([\s\S]*?)\}/);
+      const psEnabledMatch = psBlock?.[1]?.match(/enabled\s*:\s*(true|false)/);
+      const psEnabled = !psEnabledMatch || psEnabledMatch[1] === "true";
+      if (!psBlock) {
+        add(
+          "data/site.config.ts",
+          "WARN",
+          "preferredSources not configured — add preferredSources: { enabled: true, theme: \"light\", lang: \"en\" } and port Base.astro + Footer (Search Central Preferred Sources button, last updated 2026-08-20). Set enabled: false to opt out.",
+        );
+      } else if (psEnabled) {
+        const layoutCandidates = [
+          "src/layouts/Base.astro",
+          "src/components/Footer.astro",
+          "src/components/PreferredSources.astro",
+        ];
+        const hasButton = layoutCandidates.some((rel) => {
+          const p = join(dir, rel);
+          if (!existsSync(p)) return false;
+          const src = readFileSync(p, "utf8");
+          return (
+            src.includes("news.google.com/swg/js/v1/publisher.js") ||
+            src.includes("google-add-preferred-source-btn")
+          );
+        });
+        if (!hasButton) {
+          add(
+            "src/layouts/Base.astro",
+            "WARN",
+            "preferredSources.enabled is true but publisher.js / google-add-preferred-source-btn is missing. Port engine Base.astro + Footer + PreferredSources.astro (docs/AEO.md). Official script only — no custom hidden prompts.",
+          );
+        }
+        if (mount && mount !== "/") {
+          add(
+            "data/site.config.ts",
+            "WARN",
+            `Preferred Sources is domain-level only (Search Central). mount is "${mount}" — the button adds the host, not that path. That is expected. A product page at /glint is not its own source.`,
+          );
+        }
+      }
+
       // AEO twin headers (static). Content negotiation is edge-only — docs/AEO.md.
       const twinCandidates = [
         "src/pages/raw/blog/[slug].md.ts",

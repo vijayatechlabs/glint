@@ -122,3 +122,23 @@ Prerendered static files often ignore `Response` headers from API routes; hosts
 infer type from extension. Playground ships `public/_headers` for
 `/raw/blog/*.md` AEO headers and `/sitemap.xml` content-type on Cloudflare Pages
 and Netlify. Other hosts need their own header config.
+
+---
+
+## 2026-08-24
+
+**Decision 16 — Preferred Sources button is static framework, domain-level only**
+
+Google Search Central (last updated 2026-08-20 UTC) ships an official
+`publisher.js` button that adds the current **host** and returns the reader to
+the page. Glint emits that script + a footer button. It is not edge/CDN work.
+
+- Eligible sources are domain or subdomain only. A subdirectory (`/blog`,
+  `/glint`) is not its own Preferred Source. The button still adds the host;
+  that is expected, not a bug.
+- Config: `preferredSources.enabled` (default on). Brands opt out explicitly.
+- Do not invent a custom badge, hidden “recommend this brand” strings, or treat
+  the button as a citation / AIO ranking KPI.
+- Glint’s own marketing URL `vijayatechlabs.com/glint` is a subdirectory of the
+  agency host — a distinct Glint Preferred Source needs a Glint host, not an
+  engine change on that path (VTL site is out of this repo).

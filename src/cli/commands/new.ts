@@ -193,6 +193,13 @@ export const site = {
   // "all" = allow all bots (default); "retrieval-only" = block training, allow retrieval;
   // "none" = block all AI-specific bots. See .ai/docs/plans/seo-aeo-uplift.md §2.7
   aiCrawlers: "" as "" | "all" | "retrieval-only" | "none",  // set explicitly — doctor WARNs when empty
+  // Google Preferred Sources button (Search Central, last updated 2026-08-20).
+  // Domain / subdomain only — a /blog mount adds the host, not the path.
+  preferredSources: {
+    enabled: true,
+    theme: "light" as "light" | "dark",
+    lang: "en",
+  },
 } as const;
 `;
 
