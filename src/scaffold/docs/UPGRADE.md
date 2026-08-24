@@ -27,13 +27,14 @@ Diff against the engine scaffold (standalone `theme/` vs mounted `theme-mounted-
 |---|---|
 | `src/pages/raw/blog/[slug].md.ts` | `markdownTwinResponse` from `@vijayatech/glint` |
 | Post page (`blog/[slug].astro` or `[slug].astro`) | `extractHeadings` TOC; `resolveAuthor` / Person; article meta; OG `/og/{slug}.svg` fallback |
-| `src/layouts/Base.astro` | Org JSON-LD; article meta; optional `llms-full` alternate |
+| `src/layouts/Base.astro` | Org JSON-LD; article meta; optional `llms-full` alternate; Preferred Sources `publisher.js` |
+| `src/components/Footer.astro` / `PreferredSources.astro` | Official Preferred Sources button + host deeplink |
 | `src/pages/rss.xml.js` | `markdownToHtmlBasic` + resolved author |
 | `llms-full.txt.ts` / `llms.txt.ts` | Full feed + link from index |
 | `api/blog/[slug].json.ts` | Per-post JSON if missing |
 | `astro.config.*` | `glintSitemapLastmod`, `glintOgImage`, `remarkResolveLinks`, `rehypeHeadingIds` |
 | `src/posts.ts` | `resolveAuthor` (case-insensitive team ids) |
-| `data/site.config.ts` | Explicit `aiCrawlers`; optional `social` / `logo` |
+| `data/site.config.ts` | Explicit `aiCrawlers`; optional `social` / `logo`; `preferredSources` |
 | `data/team.json` | Real authors for E-E-A-T |
 
 Merge by hand if customized — do not overwrite brand chrome blindly.
@@ -43,6 +44,7 @@ Merge by hand if customized — do not overwrite brand chrome blindly.
 ## 3. Config (human decisions)
 
 - Set `aiCrawlers` explicitly (`all` | `retrieval-only` | `none`).
+- Fill `preferredSources` (`enabled` / `theme` / `lang`) or set `enabled: false`.
 - Fill `social` / `logo` when you care about Organization schema.
 - Verify **GSC + Bing Webmaster** (IndexNow does not replace Google).
 - **Do not** use Google Indexing API for normal blog posts. Prefer sitemap + GSC.

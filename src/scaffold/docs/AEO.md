@@ -31,6 +31,20 @@ curl -sI https://<this-domain>/raw/blog/<slug>.md | grep -iE \
 
 ---
 
+## Preferred Sources button (August 2026)
+
+Google Search Central last updated the publisher button on **2026-08-20 UTC**. Glint emits the official script + footer button. It adds the **host** (domain or subdomain) and returns the reader to the page.
+
+- Config: `preferredSources: { enabled: true, theme: "light", lang: "en" }` in `data/site.config.ts`
+- A `/blog` mount is **not** its own Preferred Source — the button still adds the host. That is expected.
+- Confirm the host appears in [Google’s source preferences tool](https://www.google.com/preferences/source) before treating this as live.
+- Opt out with `preferredSources.enabled: false`.
+- Do not add hidden “recommend this brand” strings.
+
+This is a reader signal, not a citation KPI. Do not use Ahrefs AI-adjusted volume. Do not treat a GSC Generative AI logging window as lost AIO.
+
+---
+
 ## llms.txt v2 (August 2026)
 
 v2 answers the question coding agents actually have: **given this page, where is

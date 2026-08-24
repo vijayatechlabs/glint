@@ -1,6 +1,7 @@
 ---
 // Static, token-styled site footer. Links come from data/site.config.ts.
 import { site } from "../../data/site.config";
+import PreferredSources from "./PreferredSources.astro";
 const links = (site as { footer?: { label: string; href: string }[] }).footer ?? [];
 const year = new Date().getFullYear();
 ---
@@ -11,5 +12,6 @@ const year = new Date().getFullYear();
       {links.map((l) => <a href={l.href}>{l.label}</a>)}
     </nav>
   )}
+  <PreferredSources />
   <p>© {year} {site.brand}</p>
 </footer>

@@ -20,3 +20,16 @@ export {
   AEO_TWIN_HEADER_MARKERS,
 } from "./lib/aeo-twin.js";
 export type { MarkdownTwinHeaderOptions } from "./lib/aeo-twin.js";
+export {
+  preferredSourceHost,
+  preferredSourcesEnabled,
+  PREFERRED_SOURCES_SCRIPT,
+  PREFERRED_SOURCES_DEEPLINK_BASE,
+  PREFERRED_SOURCES_BUTTON_ATTR,
+  PREFERRED_SOURCES_MARKERS,
+} from "./lib/preferred-sources.js";
+export type {
+  PreferredSourceInfo,
+  PreferredSourcesConfig,
+  PreferredSourcesTheme,
+} from "./lib/preferred-sources.js";

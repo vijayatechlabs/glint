@@ -9,6 +9,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- **Preferred Sources button** (Search Central, last updated 2026-08-20 UTC):
+  `preferredSourceHost()` + scaffold `PreferredSources.astro`, `publisher.js` in
+  `Base.astro`, footer deeplink, `preferredSources` site.config, doctor WARNs.
+  Domain / subdomain only — a `/blog` mount is not its own source. Reader
+  signal, not a citation KPI. Official script only; no hidden recommend strings.
 - **AEO twins:** `markdownTwinHeaders` / `markdownTwinResponse` on
   `@vijayatech/glint` — origin `/raw/blog/<slug>.md` serves
   `text/markdown; charset=utf-8` plus `X-Markdown-Tokens`, `X-Robots-Tag`,

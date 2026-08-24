@@ -28,4 +28,9 @@ export const site = {
     keyPath: "root",
   },
   aiCrawlers: "all" as "all" | "retrieval-only" | "none",
+  preferredSources: {
+    enabled: true,
+    theme: "light" as "light" | "dark",
+    lang: "en",
+  },
 } as const;

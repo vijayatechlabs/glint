@@ -29,6 +29,8 @@ const canon = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = image ? new URL(image, Astro.site).href : undefined;
 // Strip trailing slash so we can safely append asset paths.
 const siteBase = site.baseUrl.replace(/\/?$/, "");
+const preferredEnabled =
+  (site as { preferredSources?: { enabled?: boolean } }).preferredSources?.enabled !== false;
 
 // Organization JSON-LD — site-level entity signal (E-E-A-T).
 const sameAs = "social" in site && site.social && typeof site.social === "object" && !Array.isArray(site.social)
@@ -96,6 +98,13 @@ const orgSchema = {
         Safe to emit on all pages (including dev) — they're inert meta tags. */}
     {site.verification?.google && <meta name="google-site-verification" content={site.verification.google} />}
     {site.verification?.bing && <meta name="msvalidate.01" content={site.verification.bing} />}
+
+    {/* Google Preferred Sources — official publisher.js (Search Central 2026-08-20).
+        Adds the current host and returns the reader to this page. Domain/subdomain
+        only; a /blog mount is not its own source. */}
+    {preferredEnabled && (
+      <script is:inline async src="https://news.google.com/swg/js/v1/publisher.js"></script>
+    )}
 
     {/* Google Analytics 4 — PROD only, and never on noindex/draft pages so
         preview deploys don't pollute production data. */}

@@ -35,6 +35,11 @@ main { padding-block: 2rem; }
 }
 .site-footer nav a { margin-right: 1rem; color: var(--muted, #6b7280); }
 
+.glint-preferred-sources { margin: .75rem 0; }
+.glint-preferred-sources__label,
+.glint-preferred-sources__note { margin: 0 0 .35rem; font-size: .85rem; }
+.glint-preferred-sources__row { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
+
 article :is(h1, h2, h3) { line-height: 1.25; }
 article h1 { font-size: 2rem; margin-bottom: .25rem; }
 article img { border-radius: var(--radius, 8px); }

@@ -28,6 +28,8 @@ const canon = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = image ? new URL(image, Astro.site).href : undefined;
 // Strip trailing slash so we can safely append asset paths.
 const siteBase = site.baseUrl.replace(/\/?$/, "");
+const preferredEnabled =
+  (site as { preferredSources?: { enabled?: boolean } }).preferredSources?.enabled !== false;
 
 // Organization JSON-LD — site-level entity signal (E-E-A-T).
 const sameAs = "social" in site && site.social && typeof site.social === "object" && !Array.isArray(site.social)
@@ -85,6 +87,10 @@ const orgSchema = {
     <link rel="stylesheet" href={`${siteBase}/custom.css`} />
     <script type="application/ld+json" set:html={JSON.stringify(orgSchema)} />
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+
+    {preferredEnabled && (
+      <script is:inline async src="https://news.google.com/swg/js/v1/publisher.js"></script>
+    )}
   </head>
   <body>
     <Header />
