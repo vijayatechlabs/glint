@@ -142,3 +142,20 @@ the page. Glint emits that script + a footer button. It is not edge/CDN work.
 - Glint’s own marketing URL `vijayatechlabs.com/glint` is a subdirectory of the
   agency host — a distinct Glint Preferred Source needs a Glint host, not an
   engine change on that path (VTL site is out of this repo).
+
+---
+
+## 2026-08-25
+
+**Decision 17 — `llms.txt` is agent nav, not a Google Search ranking file**
+
+Search Central’s generative-AI guide (last updated 2026-07-10 UTC; June 2026
+updates note) states Google Search, including AI Overviews and AI Mode, does
+not use `llms.txt` or other special AI text/Markdown files. Chrome Lighthouse’s
+agentic-browsing audit treats a missing file (404) as N/A and only fails on
+server errors.
+
+- Keep emitting `llms.txt` / twins for coding agents (llmstxt.org v2).
+- Do not document or market them as a Google AIO/AI Mode ranking lever.
+- Google AIO/AI Mode measurement is the GSC Generative AI performance report
+  (Search), when the property has it — not `llms.txt` request logs.

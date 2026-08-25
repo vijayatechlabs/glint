@@ -79,6 +79,8 @@ Also automatic:
 
 v2 answers the question coding agents actually have: **given this page, where is the markdown and which llms.txt covers it?**
 
+**Google Search does not use `llms.txt`.** Search Central’s generative-AI guide (last updated **2026-07-10 UTC**; June 2026 updates note) says you do not need machine-readable AI text files or Markdown to appear in Google Search, including AI Overviews and AI Mode — Search itself doesn’t use them. Chrome Lighthouse’s agentic-browsing `llms.txt` audit is optional: a **404 is N/A**; a **server error fails**. Keep emitting the file for coding agents and other tools ([llmstxt.org](https://llmstxt.org/)). It is a B2A nav file, not a ranking lever.
+
 Glint emits the two v2 pieces automatically on post pages (`Base.astro`):
 
 1. `<link rel="alternate" type="text/markdown" href="/raw/blog/<slug>.md">` — the page's markdown twin.
@@ -96,10 +98,12 @@ Set explicitly in `site.config.ts`. Revisit bot lists when major crawlers change
 
 ### Measurement (eligibility, not vanity)
 
-- **GSC** + **Bing Webmaster** — first-class
+- **GSC Generative AI performance report (Search)** — impressions in AI Overviews and AI Mode. That is the Google AIO/AI Mode KPI, not `llms.txt` hits. The report is rolling out; a property may not see it yet.
+- **GSC** + **Bing Webmaster** — first-class crawl/index measurement
 - **GA4** — organic + optional AI referral events (see OpenStart `nextjs-analytics.ts` pattern; adapt for blog if needed)
 - IndexNow 200/202 = **receipt only**
 - **Preferred Sources button** = a reader signal for Top Stories / AI Mode / AI Overviews, **not** a citation KPI
+- **`llms.txt` / markdown twins** = agent nav (llmstxt.org v2, optional Lighthouse). Google Search does **not** treat them as special ranking files.
 - Do **not** use Ahrefs AI-adjusted volume as an AEO KPI
 - Do **not** treat a GSC Generative AI logging gap (e.g. 13–17 Aug 2026) as lost AIO
 
@@ -178,3 +182,6 @@ curl -s https://<brand>/sitemap-0.xml | grep raw/blog   # or sitemap.xml
 - Plan: `.ai/docs/plans/aeo-p0-visibility.md`
 - Edge snippets: `.ai/docs/plans/aeo-edge-worker.md`
 - OpenStart (sites): AEO standard + `aeo-p0-visibility.md` in the OpenStart repo
+- Google Search Central: [Optimizing for generative AI features](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide) (llms.txt mythbust; last updated 2026-07-10 UTC)
+- GSC: [Generative AI performance report (Search)](https://support.google.com/webmasters/answer/16984139)
+- Lighthouse: [llms.txt audit](https://developer.chrome.com/docs/lighthouse/agentic-browsing/llms-txt) (404 = N/A)
