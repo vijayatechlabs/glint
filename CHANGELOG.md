@@ -9,6 +9,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- **docs/AEO.md + scaffold:** GSC Search generative AI control is the include /
+  exclude for AI Overviews, AI Mode, and generative Discover (default include;
+  URL-prefix blogs inherit the parent). Measure via the Generative AI
+  performance report. Not a Glint config flag. Exclusion ≠ rest-of-Search
+  ranking and ≠ Google-Extended.
 - **Preferred Sources button** (Search Central, last updated 2026-08-20 UTC):
   `preferredSourceHost()` + scaffold `PreferredSources.astro`, `publisher.js` in
   `Base.astro`, footer deeplink, `preferredSources` site.config, doctor WARNs.
