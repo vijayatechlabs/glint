@@ -298,6 +298,21 @@ export async function runDoctor(args: string[]): Promise<void> {
         }
       }
 
+      // Open Graph share card check:
+      const seoBlock = configText.match(/seo\s*:\s*\{([\s\S]*?)\}/);
+      const ogImageMatch = seoBlock?.[1]?.match(/ogImage\s*:\s*["'`]([^"'`]*)["'`]/);
+      const ogImageVal = ogImageMatch ? ogImageMatch[1] : "/media/og-default.png";
+      if (ogImageVal && ogImageVal.startsWith("/")) {
+        const ogFilePath = join(dir, "public", ogImageVal);
+        if (!existsSync(ogFilePath)) {
+          add(
+            "data/site.config.ts",
+            "WARN",
+            `Open Graph image not found: public${ogImageVal} — social link previews (Twitter/X, LinkedIn) will fail. Create a 1200x630 share card at public${ogImageVal}.`,
+          );
+        }
+      }
+
       // AEO twin headers (static). Content negotiation is edge-only — docs/AEO.md.
       const twinCandidates = [
         "src/pages/raw/blog/[slug].md.ts",

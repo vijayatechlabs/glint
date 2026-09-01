@@ -9,6 +9,8 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- **Open Graph & Twitter link preview standards:** `Base.astro.tmpl` and playground `Base.astro` now automatically resolve `og:image` and `twitter:image` to absolute canonical URLs, support fallback to `site.seo.ogImage || "/media/og-default.png"`, emit complete dimensions (`1200x630`), types, `twitter:card`, and handle `twitter:site`/`creator` from `site.social.twitter`.
+- **doctor:** WARN when `site.seo.ogImage` is missing from `public/` directory, preventing broken social link previews on Twitter/X, LinkedIn, and messaging apps.
 - **docs/AEO.md + scaffold:** GSC Search generative AI control is the include /
   exclude for AI Overviews, AI Mode, and generative Discover (default include;
   URL-prefix blogs inherit the parent). Measure via the Generative AI

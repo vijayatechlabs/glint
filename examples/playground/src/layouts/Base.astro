@@ -25,7 +25,21 @@ interface Props {
 }
 const { title, description, canonical, markdownAlternate, describedBy, image, noindex, jsonLd, articleMeta } = Astro.props;
 const canon = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
-const ogImage = image ? new URL(image, Astro.site).href : undefined;
+const rawImage = image || (site.seo as any)?.ogImage || "/media/og-default.png";
+const ogImageUrl = rawImage
+  ? (rawImage.startsWith('http://') || rawImage.startsWith('https://')
+      ? rawImage
+      : new URL(rawImage, Astro.site).href)
+  : undefined;
+
+// Twitter handle from site.social.twitter
+const twitterHandle = ("social" in site && site.social && typeof site.social === "object" && (site.social as any).twitter)
+  ? ((site.social as any).twitter as string)
+  : undefined;
+const twitterHandleFormatted = twitterHandle
+  ? (twitterHandle.startsWith('@') ? twitterHandle : `@${twitterHandle.split('/').filter(Boolean).pop()}`)
+  : undefined;
+
 // Strip trailing slash so we can safely append asset paths.
 const siteBase = site.baseUrl.replace(/\/?$/, "");
 const preferredEnabled =
@@ -58,12 +72,30 @@ const orgSchema = {
     {noindex && <meta name="robots" content="noindex" />}
 
     <meta property="og:site_name" content={site.brand} />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="article" />
+    <meta property="og:type" content={articleMeta ? "article" : "website"} />
     <meta property="og:url" content={canon} />
-    {ogImage && <meta property="og:image" content={ogImage} />}
+    {ogImageUrl && (
+      <>
+        <meta property="og:image" content={ogImageUrl} />
+        <meta property="og:image:secure_url" content={ogImageUrl} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:alt" content={title} />
+      </>
+    )}
+    
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
+    {ogImageUrl && <meta name="twitter:image:alt" content={title} />}
+    {twitterHandleFormatted && <meta name="twitter:site" content={twitterHandleFormatted} />}
+    {twitterHandleFormatted && <meta name="twitter:creator" content={twitterHandleFormatted} />}
 
     {articleMeta && <meta property="article:published_time" content={articleMeta.publishedTime} />}
     {articleMeta && <meta property="article:modified_time" content={articleMeta.modifiedTime} />}

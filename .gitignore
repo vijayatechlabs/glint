@@ -21,3 +21,4 @@ dist/
 .mcp.json
 .cursor/
 .grok/
+mcp.json
