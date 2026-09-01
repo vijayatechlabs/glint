@@ -41,7 +41,7 @@ Google Search Central last updated the publisher button on **2026-08-20 UTC**. G
 - Opt out with `preferredSources.enabled: false`.
 - Do not add hidden “recommend this brand” strings.
 
-This is a reader signal, not a citation KPI. Do not use Ahrefs AI-adjusted volume. Do not treat a GSC Generative AI logging window as lost AIO.
+This is a reader signal, not a citation KPI. Measure Google AI Overviews / AI Mode in the [GSC Generative AI performance report (Search)](https://support.google.com/webmasters/answer/16984139), not via `llms.txt` hits. Do not use Ahrefs AI-adjusted volume. Do not treat a GSC Generative AI logging window as lost AIO.
 
 ---
 
