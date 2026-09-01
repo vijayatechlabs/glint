@@ -41,6 +41,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   tests for headings, links casing, lastmod.
 
 ### Changed
+- **docs/AEO.md:** Search Central generative-AI guide (last updated 2026-07-10 UTC)
+  — Google Search including AI Overviews / AI Mode does **not** use `llms.txt`.
+  Measure AIO/AI Mode via the GSC Generative AI performance report. Lighthouse
+  `llms.txt` 404 is N/A (optional audit). Scaffold AEO notes the same KPI.
 - **migrate indexnow:** no longer rewrites twin `Content-Type` to `text/plain`;
   upgrades plain→markdown when possible and points brands at
   `markdownTwinResponse`.
