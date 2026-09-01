@@ -159,3 +159,23 @@ server errors.
 - Do not document or market them as a Google AIO/AI Mode ranking lever.
 - Google AIO/AI Mode measurement is the GSC Generative AI performance report
   (Search), when the property has it — not `llms.txt` request logs.
+
+---
+
+## 2026-08-26
+
+**Decision 18 — GSC Search generative AI control is eligibility, not an engine switch**
+
+Search Console’s Search generative AI control (help article 16908024; still
+rolling out) is the owner-facing include/exclude for AI Overviews, AI Mode, and
+generative Discover. Default is include. Child URL-prefix properties inherit
+the parent unless an owner overrides.
+
+- Document it in `docs/AEO.md` + scaffold. Do not invent a Glint config flag
+  that pretends to flip GSC.
+- A missing Generative AI performance report is not automatically “lost AIO”
+  (rollout, low impressions, or inherited exclude).
+- Exclusion is not a ranking signal for the rest of Search and is not
+  Google-Extended / training (that stays `aiCrawlers` / robots).
+- Still do not treat the 13–17 Aug 2026 GSC Generative AI logging window as
+  lost AIO, and do not use Ahrefs AI-adjusted volume as a KPI.
