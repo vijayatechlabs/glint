@@ -179,3 +179,21 @@ the parent unless an owner overrides.
   Google-Extended / training (that stays `aiCrawlers` / robots).
 - Still do not treat the 13–17 Aug 2026 GSC Generative AI logging window as
   lost AIO, and do not use Ahrefs AI-adjusted volume as a KPI.
+
+---
+
+## 2026-09-02
+
+**Decision 19 — GSC Search generative AI control is worldwide (31 Aug 2026)**
+
+Help article 16908024 now states: as of 31 Aug 2026 the Search generative AI
+control is rolled out to all websites worldwide. Help article 16984139 notes
+the same date for insights, while still listing “not all properties have
+access… rolling out over time” as one reason a report may be missing.
+
+- Do not keep documenting the **control** as “still rolling out.”
+- A missing Generative AI performance report is still not “lost AIO”
+  (low impressions, exclude / inherited exclude, or remaining access gap).
+- Still no Glint config flag that pretends to flip GSC.
+- Control change still generally takes 1–2 days; exclusion still ≠ rest-of-Search
+  ranking and ≠ Google-Extended.
