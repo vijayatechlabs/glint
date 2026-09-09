@@ -98,8 +98,8 @@ Set explicitly in `site.config.ts`. Revisit bot lists when major crawlers change
 
 ### Measurement (eligibility, not vanity)
 
-- **GSC Search generative AI control** — Settings → Search generative AI. Default is **include** (links + grounding in AI Overviews, AI Mode, and generative Discover). A missing [Generative AI performance report](https://support.google.com/webmasters/answer/16984139) can mean rollout, low impressions, **or** an exclude / inherited exclude — not lost AIO by itself. URL-prefix blog properties (`/blog`) inherit the parent unless an owner overrides. Exclusion is **not** a ranking signal for the rest of Search; it is not Google-Extended (use `aiCrawlers` / robots for training). Glint cannot flip this — owners do it in Search Console.
-- **GSC Generative AI performance report (Search)** — impressions in AI Overviews and AI Mode, when the property has the report (that is the Google AIO/AI Mode KPI, not `llms.txt` hits; the report is rolling out; a property may not see it yet).
+- **GSC Search generative AI control** — Settings → Search generative AI. Default is **include** (links + grounding in AI Overviews, AI Mode, and generative Discover). As of **31 Aug 2026** Google rolled this control out to all websites worldwide. URL-prefix blog properties (`/blog`) inherit the parent unless an owner overrides. Exclusion is **not** a ranking signal for the rest of Search; it is not Google-Extended (use `aiCrawlers` / robots for training). A control change generally takes 1–2 days. Glint cannot flip this — owners do it in Search Console.
+- **GSC Generative AI performance report (Search)** — impressions in AI Overviews and AI Mode, when the property has the report (Google AIO/AI Mode KPI, not `llms.txt` hits). Help article 16984139 notes insights rolled out worldwide as of **31 Aug 2026**; a missing report can still mean low impressions, an exclude / inherited exclude, or the article’s remaining “not all properties have access yet” clause — not lost AIO by itself.
 - **GSC** + **Bing Webmaster** — first-class crawl/index measurement
 - **GA4** — organic + optional AI referral events (see OpenStart `nextjs-analytics.ts` pattern; adapt for blog if needed)
 - IndexNow 200/202 = **receipt only**
@@ -184,6 +184,6 @@ curl -s https://<brand>/sitemap-0.xml | grep raw/blog   # or sitemap.xml
 - Edge snippets: `.ai/docs/plans/aeo-edge-worker.md`
 - OpenStart (sites): AEO standard + `aeo-p0-visibility.md` in the OpenStart repo
 - Google Search Central: [Optimizing for generative AI features](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide) (llms.txt mythbust; last updated 2026-07-10 UTC; eligibility includes the GSC control)
-- GSC: [Search generative AI control](https://support.google.com/webmasters/answer/16908024) (default include; URL-prefix inherits parent)
-- GSC: [Generative AI performance report (Search)](https://support.google.com/webmasters/answer/16984139)
+- GSC: [Search generative AI control](https://support.google.com/webmasters/answer/16908024) (worldwide as of 31 Aug 2026; default include; URL-prefix inherits parent)
+- GSC: [Generative AI performance report (Search)](https://support.google.com/webmasters/answer/16984139) (insights note: worldwide as of 31 Aug 2026)
 - Lighthouse: [llms.txt audit](https://developer.chrome.com/docs/lighthouse/agentic-browsing/llms-txt) (404 = N/A)

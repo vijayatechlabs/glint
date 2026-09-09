@@ -43,6 +43,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   tests for headings, links casing, lastmod.
 
 ### Changed
+- **docs/AEO.md + scaffold + DECISIONS:** GSC Search generative AI control is
+  worldwide as of 31 Aug 2026 (help 16908024). Insights note the same date
+  (help 16984139); a missing report still ≠ lost AIO. Not a Glint config flag.
 - **docs/AEO.md:** Search Central generative-AI guide (last updated 2026-07-10 UTC)
   — Google Search including AI Overviews / AI Mode does **not** use `llms.txt`.
   Measure AIO/AI Mode via the GSC Generative AI performance report. Lighthouse
